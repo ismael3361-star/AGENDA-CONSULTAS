@@ -42,7 +42,8 @@
   .zoom { display: inline-flex; gap: 6px; }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
-  .btn-danger { color: var(--danger); }
+  .btn-danger { color: var(--danger); background: var(--danger-soft); border-color: #F3B4AE; }
+  .btn-danger-forte { background: var(--danger); border-color: var(--danger); color: #fff; }
   .btn-ghost { background: transparent; border-color: transparent; }
   .btn-icon { width: 52px; font-size: 28px; padding: 0; justify-content: center; }
 
@@ -79,8 +80,8 @@
     max-width: 1400px; margin: 0 auto; padding: 24px;
     display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;
   }
-  .side { flex: 1 1 340px; max-width: 470px; display: flex; flex-direction: column; gap: 16px; }
-  .content { flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .side { order: 2; flex: 1 1 340px; max-width: 470px; display: flex; flex-direction: column; gap: 16px; }
+  .content { order: 1; flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
   @media (max-width: 760px) { .side { max-width: none; } main.app { padding: 16px; } }
 
   .panel { background: var(--card); border-radius: var(--radius); padding: 18px; }
@@ -120,9 +121,9 @@
   .grupo-mes { margin: 10px 0 -2px; font-size: 19px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
   .consulta {
     background: var(--card); border-radius: var(--radius); padding: 20px 22px;
-    display: flex; gap: 22px; align-items: flex-start; border: 2px solid transparent; cursor: pointer; text-align: left; width: 100%; color: var(--ink);
+    display: flex; gap: 22px; align-items: flex-start; border: 2px solid transparent; text-align: left; width: 100%; color: var(--ink);
   }
-  .consulta:hover { border-color: #C9CDD4; }
+  .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
   .consulta.passada { opacity: 0.85; }
   .data-box { width: 86px; flex-shrink: 0; text-align: center; border-radius: 12px; background: var(--bg); padding: 8px 0; }
   .data-box .dia { display: block; font-size: 36px; font-weight: 800; line-height: 1.1; }
@@ -202,7 +203,6 @@
 
   <main class="app">
     <aside class="side">
-      <button class="btn btn-primary" id="btn-nova" type="button" style="justify-content:center; min-height:64px; font-size:24px">+ Nova consulta</button>
 
       <section class="panel" aria-label="Calendário">
         <div class="cal-head">
@@ -221,6 +221,7 @@
     </aside>
 
     <section class="content">
+      <button class="btn btn-primary" id="btn-nova" type="button" style="justify-content:center; min-height:64px; font-size:24px">+ Nova consulta</button>
       <div class="toolbar">
         <div class="tabs" role="group" aria-label="Mostrar">
           <button type="button" data-filtro="proximas" aria-pressed="true">Próximas</button>
@@ -294,6 +295,20 @@
       </div>
     </div>
   </form>
+</dialog>
+
+<!-- Confirmar exclusão -->
+<dialog id="dlg-excluir">
+  <div class="dlg">
+    <h2>Excluir esta consulta?</h2>
+    <p id="exc-texto" style="margin:0; font-size:22px; font-weight:700"></p>
+    <p style="margin:0; color: var(--muted)">Depois de excluir, não dá para desfazer.</p>
+    <div id="exc-msg" class="msg msg-erro hidden" role="alert"></div>
+    <div class="dlg-acoes">
+      <button class="btn" id="exc-nao" type="button">Não, voltar</button>
+      <button class="btn btn-danger-forte" id="exc-sim" type="button">Sim, excluir</button>
+    </div>
+  </div>
 </dialog>
 
 <script type="module">
@@ -515,7 +530,7 @@ function renderLista() {
     const passada = d < agora;
     const statusTxt = { agendada: 'Agendada', realizada: 'Realizada', cancelada: 'Cancelada' }[c.status];
     html +=
-      '<button type="button" class="consulta' + (passada ? ' passada' : '') + '" data-id="' + c.id + '">' +
+      '<article class="consulta' + (passada ? ' passada' : '') + '">' +
         '<span class="data-box"><span class="dia">' + d.getDate() + '</span><span class="mes">' + MESES_CURTOS[d.getMonth()] + '</span></span>' +
         '<span class="consulta-info">' +
           '<span class="consulta-titulo">' + esc(c.especialidade) + (c.medico ? ' — ' + esc(c.medico) : '') + '</span>' +
@@ -527,15 +542,21 @@ function renderLista() {
             (q ? '<span class="tag tag-quando">' + q + '</span>' : '') +
             '<span class="tag tag-' + c.status + '">' + statusTxt + '</span>' +
           '</span>' +
+          '<span class="acoes">' +
+            '<button type="button" class="btn" data-editar="' + c.id + '">✏️ Editar</button>' +
+            '<button type="button" class="btn btn-danger" data-excluir="' + c.id + '">🗑 Excluir</button>' +
+          '</span>' +
         '</span>' +
-      '</button>';
+      '</article>';
   });
   $('lista').innerHTML = html;
 }
 
 $('lista').addEventListener('click', (e) => {
-  const b = e.target.closest('[data-id]');
-  if (b) abrirForm(estado.consultas.find((c) => c.id === b.dataset.id));
+  const ed = e.target.closest('[data-editar]');
+  if (ed) abrirForm(estado.consultas.find((c) => c.id === ed.dataset.editar));
+  const ex = e.target.closest('[data-excluir]');
+  if (ex) excluirConsulta(estado.consultas.find((c) => c.id === ex.dataset.excluir));
 });
 
 function renderResumo() {
@@ -553,7 +574,7 @@ function render() {
 }
 
 // ---------- formulário ----------
-$('lista-esp').innerHTML = ESPECIALIDADES.map((e) => '<option value="' + e + '"></option>').join('');
+$('lista-esp').innerHTML = ESPECIALIDADES.map((e) => '<option value="' + e.toUpperCase() + '"></option>').join('');
 
 function abrirForm(consulta) {
   estado.editando = consulta || null;
@@ -592,12 +613,12 @@ $('form-consulta').addEventListener('submit', async (e) => {
 
   const dados = {
     data_hora: dataHora.toISOString(),
-    especialidade: $('f-esp').value.trim(),
-    medico: $('f-medico').value.trim() || null,
-    local: $('f-local').value.trim() || null,
-    telefone: $('f-tel').value.trim() || null,
+    especialidade: $('f-esp').value.trim().toUpperCase(),
+    medico: $('f-medico').value.trim().toUpperCase() || null,
+    local: $('f-local').value.trim().toUpperCase() || null,
+    telefone: $('f-tel').value.trim().toUpperCase() || null,
     status: $('f-status').value,
-    observacoes: $('f-obs').value.trim() || null,
+    observacoes: $('f-obs').value.trim().toUpperCase() || null,
   };
 
   $('btn-salvar').disabled = true;
@@ -615,30 +636,63 @@ $('form-consulta').addEventListener('submit', async (e) => {
   await carregar();
 });
 
-$('btn-excluir').addEventListener('click', async () => {
+$('btn-excluir').addEventListener('click', () => {
   if (!estado.editando) return;
-  if (!confirm('Excluir esta consulta? Não dá para desfazer.')) return;
-  const { error } = await sb.from('consultas').delete().eq('id', estado.editando.id);
+  const c = estado.editando;
+  $('dlg').close();
+  excluirConsulta(c);
+});
+
+// Confirmação grande antes de excluir
+let consultaParaExcluir = null;
+function excluirConsulta(c) {
+  if (!c) return;
+  consultaParaExcluir = c;
+  const d = c.quando;
+  $('exc-texto').textContent = c.especialidade + (c.medico ? ' — ' + c.medico : '') +
+    ' · ' + DIAS_SEMANA[d.getDay()] + ', ' + d.getDate() + ' de ' + MESES[d.getMonth()] + ' às ' + hora(d);
+  mostrarErro($('exc-msg'), '');
+  $('dlg-excluir').showModal();
+  $('exc-nao').focus();
+}
+$('exc-nao').addEventListener('click', () => $('dlg-excluir').close());
+$('exc-sim').addEventListener('click', async () => {
+  if (!consultaParaExcluir) return;
+  $('exc-sim').disabled = true;
+  const { error } = await sb.from('consultas').delete().eq('id', consultaParaExcluir.id);
+  $('exc-sim').disabled = false;
   if (error) {
-    mostrarErro($('dlg-msg'), 'Não foi possível excluir: ' + error.message);
+    mostrarErro($('exc-msg'), 'Não foi possível excluir: ' + error.message);
     return;
   }
-  $('dlg').close();
+  consultaParaExcluir = null;
+  $('dlg-excluir').close();
   await carregar();
+});
+
+// Tudo que for digitado vira MAIÚSCULA na hora
+document.querySelectorAll('#form-consulta input[type="text"], #form-consulta input[type="tel"], #form-consulta textarea, #busca').forEach((el) => {
+  el.addEventListener('input', () => {
+    const u = el.value.toUpperCase();
+    if (u === el.value) return;
+    const a = el.selectionStart, b = el.selectionEnd;
+    el.value = u;
+    try { el.setSelectionRange(a, b); } catch (e) {}
+  });
 });
 
 $('btn-imprimir').addEventListener('click', () => window.print());
 
 // ---------- tamanho da letra (A− / A+), lembrado neste computador ----------
-const ZOOMS = [1, 1.2, 1.4, 1.6, 1.8, 2];
-let zoomNivel = 2; // começa em 140%
-try { const v = localStorage.getItem('agenda-zoom-v2'); const z = v === null ? NaN : Number(v); if (z >= 0 && z < ZOOMS.length) zoomNivel = z; } catch (e) {}
+const ZOOMS = [1, 1.2, 1.4, 1.6, 1.8, 2, 2.3, 2.6];
+let zoomNivel = 4; // começa em 180%
+try { const v = localStorage.getItem('agenda-zoom-v3'); const z = v === null ? NaN : Number(v); if (z >= 0 && z < ZOOMS.length) zoomNivel = z; } catch (e) {}
 function aplicarZoom() {
   document.body.style.zoom = ZOOMS[zoomNivel];
   document.documentElement.style.setProperty('--z', String(ZOOMS[zoomNivel]));
   $('zoom-menos').disabled = zoomNivel === 0;
   $('zoom-mais').disabled = zoomNivel === ZOOMS.length - 1;
-  try { localStorage.setItem('agenda-zoom-v2', String(zoomNivel)); } catch (e) {}
+  try { localStorage.setItem('agenda-zoom-v3', String(zoomNivel)); } catch (e) {}
 }
 $('zoom-menos').addEventListener('click', () => { if (zoomNivel > 0) { zoomNivel--; aplicarZoom(); } });
 $('zoom-mais').addEventListener('click', () => { if (zoomNivel < ZOOMS.length - 1) { zoomNivel++; aplicarZoom(); } });
