@@ -43,6 +43,9 @@
   }
   .btn:hover { border-color: #C9CDD4; }
   .zoom { display: inline-flex; gap: 6px; }
+  .boas-vindas { background: var(--accent-soft); border: 2px solid #C9D5F7; border-radius: var(--radius); padding: 20px 22px; color: var(--ink); }
+  .boas-vindas h2 { margin: 0 0 6px; font-size: 28px; color: var(--accent-dark); }
+  .boas-vindas p { margin: 0; font-size: 21px; font-weight: 600; }
   /* celular: nada pode passar da largura da tela */
   .field input, .field select, .field textarea { width: 100%; min-width: 0; }
   dialog { overflow-x: hidden; }
@@ -219,6 +222,10 @@
     </aside>
 
     <section class="content">
+      <section class="boas-vindas" id="boas-vindas" aria-live="polite">
+        <h2 id="bv-saudacao"></h2>
+        <p id="bv-texto"></p>
+      </section>
       <button class="btn btn-primary" id="btn-nova" type="button" style="justify-content:center; min-height:64px; font-size:24px">+ Nova consulta</button>
       <div class="toolbar">
         <div class="tabs" role="group" aria-label="Mostrar">
@@ -407,6 +414,7 @@ async function entrarOuSair(sessao) {
   if (logado) {
     const email = sessao.user.email || '';
     $('usuario').textContent = email.endsWith('@' + DOMINIO_LOGIN) ? email.split('@')[0] : email;
+    estado.nome = email.split('@')[0].replace(/[._-]+/g, ' ').trim();
     await carregar();
   } else {
     estado.consultas = [];
@@ -566,7 +574,34 @@ function renderResumo() {
     c.status !== 'cancelada' && c.quando.getMonth() === m.getMonth() && c.quando.getFullYear() === m.getFullYear()).length;
 }
 
+function renderBoasVindas() {
+  const agora = new Date();
+  const h = agora.getHours();
+  const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  $('bv-saudacao').textContent = saudacao + (estado.nome ? ', ' + estado.nome : '') + '!';
+
+  const futuras = estado.consultas.filter((c) => c.status === 'agendada' && c.quando >= agora);
+  if (!futuras.length) {
+    $('bv-texto').textContent = 'Você não tem consultas marcadas.';
+    return;
+  }
+  const c = futuras[0];
+  const d = c.quando;
+  const nome = c.especialidade + (c.medico ? ' — ' + c.medico : '');
+  const q = quando(d);
+  let texto;
+  if (q === 'Hoje') texto = 'Hoje você tem consulta às ' + hora(d) + ': ' + nome + '.';
+  else if (q === 'Amanhã') texto = 'Sua próxima consulta é amanhã, às ' + hora(d) + ': ' + nome + '.';
+  else texto = 'Sua próxima consulta é ' + DIAS_SEMANA[d.getDay()] + ', dia ' + d.getDate() + ' de ' + MESES[d.getMonth()] + ', às ' + hora(d) + ': ' + nome + '.';
+
+  const em7 = new Date(agora.getTime() + 7 * 86400000);
+  const semana = futuras.filter((x) => x.quando <= em7).length;
+  if (semana > 1) texto += ' Nos próximos 7 dias são ' + semana + ' consultas.';
+  $('bv-texto').textContent = texto;
+}
+
 function render() {
+  renderBoasVindas();
   renderCalendario();
   renderLista();
   renderResumo();
