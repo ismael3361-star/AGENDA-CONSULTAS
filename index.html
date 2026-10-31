@@ -40,6 +40,11 @@
   }
   .btn:hover { border-color: #C9CDD4; }
   .zoom { display: inline-flex; gap: 6px; }
+  /* celular: nada pode passar da largura da tela */
+  .field input, .field select, .field textarea { width: 100%; min-width: 0; }
+  dialog { overflow-x: hidden; }
+  .tabs { flex-wrap: wrap; max-width: 100%; }
+  .busca { min-width: 0; }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
   .btn-danger { color: var(--danger); background: var(--danger-soft); border-color: #F3B4AE; }
@@ -676,7 +681,8 @@ $('btn-imprimir').addEventListener('click', () => window.print());
 
 // ---------- tamanho da letra (A− / A+), lembrado neste computador ----------
 const ZOOMS = [1, 1.2, 1.4, 1.6, 1.8, 2, 2.3, 2.6];
-let zoomNivel = 4; // começa em 180%
+// no computador começa em 180%; no celular (tela estreita) começa no tamanho normal, que já é grande
+let zoomNivel = window.innerWidth < 700 ? 0 : 4;
 try { const v = localStorage.getItem('agenda-zoom-v3'); const z = v === null ? NaN : Number(v); if (z >= 0 && z < ZOOMS.length) zoomNivel = z; } catch (e) {}
 function aplicarZoom() {
   document.body.style.zoom = ZOOMS[zoomNivel];
