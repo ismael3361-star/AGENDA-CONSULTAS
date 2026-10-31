@@ -1,0 +1,46 @@
+name: Avisos de consulta no WhatsApp
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'   # a cada 30 minutos (o GitHub pode atrasar alguns minutos)
+  workflow_dispatch:
+    inputs:
+      teste:
+        description: 'Só mandar uma mensagem de teste'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: write   # usado só para manter a rotina ativa
+
+concurrency:
+  group: avisos
+  cancel-in-progress: false
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enviar avisos
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          WHATSAPP_CONTATOS: ${{ secrets.WHATSAPP_CONTATOS }}
+          MODO_TESTE: ${{ inputs.teste == true && 'true' || 'false' }}
+        run: node enviar-avisos.mjs
+
+      # O GitHub desliga rotinas agendadas de repositórios sem alterações por 60 dias.
+      # Este passo reativa a rotina para ela não parar sozinha.
+      - name: Manter rotina ativa
+        if: always() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/avisos.yml/enable" || true
