@@ -204,16 +204,6 @@
   <main class="app">
     <aside class="side">
 
-      <section class="panel" aria-label="Calendário">
-        <div class="cal-head">
-          <button class="btn btn-ghost btn-icon" id="cal-ant" type="button" aria-label="Mês anterior">‹</button>
-          <h2 id="cal-titulo"></h2>
-          <button class="btn btn-ghost btn-icon" id="cal-prox" type="button" aria-label="Próximo mês">›</button>
-        </div>
-        <div class="cal-grid" id="cal-wd"></div>
-        <div class="cal-grid" id="cal-dias"></div>
-      </section>
-
       <div class="resumo">
         <div><strong id="n-proximas">0</strong><span>próximas consultas</span></div>
         <div><strong id="n-mes">0</strong><span>neste mês</span></div>
@@ -429,6 +419,7 @@ async function carregar() {
 
 // ---------- calendário ----------
 function renderCalendario() {
+  if (!$('cal-dias')) return; // calendário retirado da tela
   const m = estado.mesVisto;
   $('cal-titulo').textContent = MESES[m.getMonth()] + ' ' + m.getFullYear();
   $('cal-wd').innerHTML = ['D','S','T','Q','Q','S','S'].map((d) => '<div class="cal-wd">' + d + '</div>').join('');
@@ -460,14 +451,14 @@ function renderCalendario() {
   $('cal-dias').innerHTML = html;
 }
 
-$('cal-dias').addEventListener('click', (e) => {
+$('cal-dias') && $('cal-dias').addEventListener('click', (e) => {
   const b = e.target.closest('[data-dia]');
   if (!b) return;
   estado.diaSel = estado.diaSel === b.dataset.dia ? null : b.dataset.dia;
   render();
 });
-$('cal-ant').addEventListener('click', () => { estado.mesVisto = new Date(estado.mesVisto.getFullYear(), estado.mesVisto.getMonth() - 1, 1); renderCalendario(); });
-$('cal-prox').addEventListener('click', () => { estado.mesVisto = new Date(estado.mesVisto.getFullYear(), estado.mesVisto.getMonth() + 1, 1); renderCalendario(); });
+$('cal-ant') && $('cal-ant').addEventListener('click', () => { estado.mesVisto = new Date(estado.mesVisto.getFullYear(), estado.mesVisto.getMonth() - 1, 1); renderCalendario(); });
+$('cal-prox') && $('cal-prox').addEventListener('click', () => { estado.mesVisto = new Date(estado.mesVisto.getFullYear(), estado.mesVisto.getMonth() + 1, 1); renderCalendario(); });
 $('limpar-dia').addEventListener('click', () => { estado.diaSel = null; render(); });
 
 // ---------- lista ----------
