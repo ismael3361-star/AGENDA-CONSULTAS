@@ -46,6 +46,15 @@
   .boas-vindas { background: var(--accent-soft); border: 2px solid #C9D5F7; border-radius: var(--radius); padding: 20px 22px; color: var(--ink); }
   .boas-vindas h2 { margin: 0 0 6px; font-size: 28px; color: var(--accent-dark); }
   .boas-vindas p { margin: 0; font-size: 21px; font-weight: 600; }
+  /* alerta de consulta próxima: pisca em vermelho */
+  .alerta { position: sticky; top: 8px; z-index: 5; border-radius: var(--radius); padding: 20px 22px; color: #fff;
+    background: var(--danger); box-shadow: 0 8px 24px rgba(180,35,24,0.35); display: flex; flex-direction: column; gap: 12px;
+    animation: piscar 1.2s ease-in-out infinite; }
+  .alerta strong { font-size: 30px; line-height: 1.2; }
+  .alerta span { font-size: 22px; font-weight: 700; }
+  .alerta .btn { align-self: flex-start; background: #fff; color: var(--danger); border-color: #fff; font-weight: 800; min-height: 60px; font-size: 22px; }
+  @keyframes piscar { 0%, 100% { background: #B42318; } 50% { background: #E8533F; } }
+  @media (prefers-reduced-motion: reduce) { .alerta { animation: none; } }
   /* celular: nada pode passar da largura da tela */
   .field input, .field select, .field textarea { width: 100%; min-width: 0; }
   dialog { overflow-x: hidden; }
@@ -222,6 +231,11 @@
     </aside>
 
     <section class="content">
+      <div class="alerta hidden" id="alerta" role="alert">
+        <strong id="alerta-titulo"></strong>
+        <span id="alerta-texto"></span>
+        <button class="btn" id="alerta-ok" type="button">✔ Entendi</button>
+      </div>
       <section class="boas-vindas" id="boas-vindas" aria-live="polite">
         <h2 id="bv-saudacao"></h2>
         <p id="bv-texto"></p>
@@ -600,8 +614,83 @@ function renderBoasVindas() {
   $('bv-texto').textContent = texto;
 }
 
+// ---------- alerta na tela (pisca + som) quando a consulta está perto ----------
+const ALERTA_ANTES_MIN = 120;   // começa a avisar 2 horas antes
+const ALERTA_DEPOIS_MIN = 30;   // continua até 30 min depois do horário
+const SOM_A_CADA_MS = 2 * 60000; // repete o som a cada 2 minutos
+let audioCtx = null, ultimoSom = 0, alertaAtual = null, tituloPiscando = null;
+const TITULO_ORIGINAL = document.title;
+
+// O navegador só libera som depois de um clique ou toque na página
+function liberarSom() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    Promise.resolve(audioCtx.state === 'suspended' ? audioCtx.resume() : null)
+      .then(() => { if (alertaAtual) verificarAlertas(); });
+  } catch (e) {}
+}
+['click', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, liberarSom, { passive: true }));
+
+function tocarAlarme() {
+  if (!audioCtx || audioCtx.state !== 'running') return;
+  const t0 = audioCtx.currentTime;
+  for (let i = 0; i < 3; i++) {
+    for (const [freq, ini] of [[880, 0], [660, 0.22]]) {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = freq;
+      const t = t0 + i * 0.7 + ini;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t); o.stop(t + 0.22);
+    }
+  }
+}
+
+function chaveAlerta(c) { return 'agenda-alerta-ok:' + c.id + ':' + c.data_hora; }
+function jaConfirmado(c) { try { return localStorage.getItem(chaveAlerta(c)) === '1'; } catch (e) { return false; } }
+
+function textoFalta(min) {
+  if (min <= 1) return 'ESTÁ NA HORA DA CONSULTA!';
+  const h = Math.floor(min / 60), m = Math.round(min % 60);
+  return 'FALTAM ' + (h ? h + (h === 1 ? ' HORA' : ' HORAS') + (m ? ' E ' : '') : '') + (m ? m + ' MINUTOS' : '') + ' PARA A CONSULTA';
+}
+
+function verificarAlertas() {
+  const agora = new Date();
+  const c = estado.consultas.find((x) => {
+    if (x.status !== 'agendada' || jaConfirmado(x)) return false;
+    const min = (x.quando - agora) / 60000;
+    return min <= ALERTA_ANTES_MIN && min >= -ALERTA_DEPOIS_MIN;
+  });
+  alertaAtual = c || null;
+  if (!c) {
+    $('alerta').classList.add('hidden');
+    if (tituloPiscando) { clearInterval(tituloPiscando); tituloPiscando = null; document.title = TITULO_ORIGINAL; }
+    return;
+  }
+  const min = (c.quando - agora) / 60000;
+  $('alerta-titulo').textContent = '⏰ ' + textoFalta(Math.max(0, min));
+  $('alerta-texto').textContent = 'ÀS ' + hora(c.quando) + ' — ' + c.especialidade + (c.medico ? ' — ' + c.medico : '') + (c.local ? ' · ' + c.local : '');
+  $('alerta').classList.remove('hidden');
+  if (!tituloPiscando) {
+    let alterna = false;
+    tituloPiscando = setInterval(() => { alterna = !alterna; document.title = alterna ? '⏰ CONSULTA!' : TITULO_ORIGINAL; }, 1000);
+  }
+  if (Date.now() - ultimoSom >= SOM_A_CADA_MS) { tocarAlarme(); if (audioCtx && audioCtx.state === 'running') ultimoSom = Date.now(); }
+}
+
+$('alerta-ok').addEventListener('click', () => {
+  if (alertaAtual) { try { localStorage.setItem(chaveAlerta(alertaAtual), '1'); } catch (e) {} }
+  ultimoSom = 0;
+  verificarAlertas();
+});
+setInterval(() => { if (estado.consultas.length) { verificarAlertas(); renderBoasVindas(); } }, 30000);
+
 function render() {
   renderBoasVindas();
+  verificarAlertas();
   renderCalendario();
   renderLista();
   renderResumo();
