@@ -318,7 +318,8 @@ if (SUPABASE_URL.startsWith('COLE_') || SUPABASE_KEY.startsWith('COLE_')) {
   throw new Error('Supabase não configurado');
 }
 
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+// Usa só o endereço base do projeto, mesmo que a URL colada tenha /rest/v1 ou outro caminho
+const sb = createClient(new URL(SUPABASE_URL.trim()).origin, SUPABASE_KEY.trim());
 
 // ---------- utilidades ----------
 function inicioMes(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
