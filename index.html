@@ -170,8 +170,8 @@
     <h1>Agenda de Consultas</h1>
     <p>Entre para ver e cadastrar as consultas.</p>
     <div class="field">
-      <label for="login-email">E-mail</label>
-      <input id="login-email" type="email" autocomplete="username" required>
+      <label for="login-email">Nome</label>
+      <input id="login-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
     </div>
     <div class="field">
       <label for="login-senha">Senha</label>
@@ -347,11 +347,30 @@ $('form-login').addEventListener('submit', async (e) => {
   e.preventDefault();
   mostrarErro($('login-msg'), '');
   const { error } = await sb.auth.signInWithPassword({
-    email: $('login-email').value.trim(),
+    email: nomeParaEmail($('login-email').value),
     password: $('login-senha').value,
   });
-  if (error) mostrarErro($('login-msg'), 'E-mail ou senha incorretos.');
+  if (!error) return;
+  const m = (error.message || '').toLowerCase();
+  let texto = 'Não foi possível entrar: ' + error.message;
+  if (m.includes('invalid login credentials')) texto = 'Nome ou senha incorretos.';
+  else if (m.includes('email not confirmed')) texto = 'Usuário ainda não confirmado. No Supabase, confirme o usuário (Auto Confirm User).';
+  else if (m.includes('invalid api key') || m.includes('no api key') || m.includes('failed to fetch')) texto = 'Erro de configuração: confira a SUPABASE_URL e a SUPABASE_KEY no index.html.';
+  mostrarErro($('login-msg'), texto);
 });
+
+// O Supabase exige e-mail; o nome digitado vira "nome@agenda.local".
+// Quem digitar um e-mail completo (com @) entra com ele normalmente.
+const DOMINIO_LOGIN = 'agenda.local';
+function nomeParaEmail(nome) {
+  const limpo = nome.trim().toLowerCase();
+  if (limpo.includes('@')) return limpo;
+  const usuario = limpo
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '.')
+    .replace(/^\.+|\.+$/g, '');
+  return usuario + '@' + DOMINIO_LOGIN;
+}
 
 $('btn-sair').addEventListener('click', () => sb.auth.signOut());
 
@@ -365,7 +384,8 @@ async function entrarOuSair(sessao) {
   $('tela-login').classList.toggle('hidden', logado);
   $('tela-app').classList.toggle('hidden', !logado);
   if (logado) {
-    $('usuario').textContent = sessao.user.email;
+    const email = sessao.user.email || '';
+    $('usuario').textContent = email.endsWith('@' + DOMINIO_LOGIN) ? email.split('@')[0] : email;
     await carregar();
   } else {
     estado.consultas = [];
