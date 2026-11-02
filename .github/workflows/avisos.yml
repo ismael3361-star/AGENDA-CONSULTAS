@@ -29,11 +29,17 @@ jobs:
         with:
           node-version: 20
 
+      - name: Preparar envio de e-mail
+        run: npm install --no-save --no-package-lock --no-audit --no-fund nodemailer@6
+
       - name: Enviar avisos
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           WHATSAPP_CONTATOS: ${{ secrets.WHATSAPP_CONTATOS }}
+          EMAIL_REMETENTE: ${{ secrets.EMAIL_REMETENTE }}
+          EMAIL_SENHA_APP: ${{ secrets.EMAIL_SENHA_APP }}
+          EMAIL_DESTINOS: ${{ secrets.EMAIL_DESTINOS }}
           MODO_TESTE: ${{ inputs.teste == true && 'true' || 'false' }}
         run: node enviar-avisos.mjs
 
