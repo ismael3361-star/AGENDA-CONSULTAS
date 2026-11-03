@@ -45,6 +45,7 @@
   .zoom { display: inline-flex; gap: 6px; }
   .boas-vindas { background: var(--accent-soft); border: 2px solid #C9D5F7; border-radius: var(--radius); padding: 20px 22px; color: var(--ink); }
   .boas-vindas h2 { margin: 0 0 6px; font-size: 28px; color: var(--accent-dark); }
+  .boas-vindas .frase { margin: 0 0 12px; font-size: 23px; font-weight: 700; color: #7A2E8E; }
   .boas-vindas p { margin: 0; font-size: 21px; font-weight: 600; }
   /* alerta de consulta próxima: pisca em vermelho */
   .alerta { position: sticky; top: 8px; z-index: 5; border-radius: var(--radius); padding: 20px 22px; color: #fff;
@@ -238,6 +239,7 @@
       </div>
       <section class="boas-vindas" id="boas-vindas" aria-live="polite">
         <h2 id="bv-saudacao"></h2>
+        <p class="frase" id="bv-frase"></p>
         <p id="bv-texto"></p>
       </section>
       <button class="btn btn-primary" id="btn-nova" type="button" style="justify-content:center; min-height:64px; font-size:24px">+ Nova consulta</button>
@@ -429,6 +431,7 @@ async function entrarOuSair(sessao) {
     const email = sessao.user.email || '';
     $('usuario').textContent = email.endsWith('@' + DOMINIO_LOGIN) ? email.split('@')[0] : email;
     estado.nome = email.split('@')[0].replace(/[._-]+/g, ' ').trim();
+    estado.frase = escolherFrase();
     await carregar();
   } else {
     estado.consultas = [];
@@ -588,11 +591,42 @@ function renderResumo() {
     c.status !== 'cancelada' && c.quando.getMonth() === m.getMonth() && c.quando.getFullYear() === m.getFullYear()).length;
 }
 
+// Frases carinhosas: muda a cada vez que entra, sem repetir a última
+const FRASES = [
+  'Como está o casal mais fofo do Brasil? 💕',
+  'Que alegria ver vocês por aqui! 😊',
+  'Vocês são o orgulho da família! ❤️',
+  'O casal mais lindo de São Paulo chegou! 🌹',
+  'Hoje é um ótimo dia para sorrir juntos! 😄',
+  'Juntos, vocês deixam tudo mais bonito! 💐',
+  'Que Deus abençoe o dia de vocês! 🙏',
+  'Saúde e muito amor para o casal mais querido! 💖',
+  'Vocês são exemplo de amor e parceria! 👫',
+  'Bem-vindos! A família ama muito vocês! 🥰',
+  'Que o dia de vocês seja leve e cheio de paz! 🌤️',
+  'Cuidar da saúde é cuidar de quem a gente ama! 💙',
+  'Mais um dia ao lado do casal mais fofo do mundo! 🌎',
+  'Vocês merecem todo o carinho do mundo! 🤗',
+  'Um café, um sorriso e o casal mais querido! ☕',
+  'Que bom ter vocês com a gente! 🌻',
+];
+function escolherFrase() {
+  let ultima = -1;
+  try { ultima = Number(localStorage.getItem('agenda-ultima-frase') ?? -1); } catch (e) {}
+  // na primeira vez, sempre a frase do casal mais fofo do Brasil
+  let i = ultima < 0 ? 0 : Math.floor(Math.random() * FRASES.length);
+  if (FRASES.length > 1 && i === ultima) i = (i + 1) % FRASES.length;
+  try { localStorage.setItem('agenda-ultima-frase', String(i)); } catch (e) {}
+  return FRASES[i];
+}
+
 function renderBoasVindas() {
   const agora = new Date();
   const h = agora.getHours();
   const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-  $('bv-saudacao').textContent = saudacao + (estado.nome ? ', ' + estado.nome : '') + '!';
+  $('bv-saudacao').textContent = 'Olá, Sr. Roberto e Antonia! ' + saudacao + '!';
+  if (!estado.frase) estado.frase = escolherFrase();
+  $('bv-frase').textContent = estado.frase;
 
   const futuras = estado.consultas.filter((c) => c.status === 'agendada' && c.quando >= agora);
   if (!futuras.length) {
