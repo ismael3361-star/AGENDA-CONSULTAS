@@ -3,858 +3,278 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173b8f">
 <title>Agenda de Consultas</title>
 <link rel="icon" type="image/png" href="icone.png">
 <link rel="apple-touch-icon" href="icone.png">
 <meta name="apple-mobile-web-app-title" content="Consultas">
 <style>
-  :root {
-    --bg: #F4F5F7;
-    --card: #FFFFFF;
-    --ink: #16181D;
-    --muted: #3D424B;
-    --line: #D5D8DE;
-    --accent: #2448C9;
-    --accent-dark: #1A379E;
-    --accent-soft: #E6ECFC;
-    --ok: #0E7A55;
-    --ok-soft: #DDF3EA;
-    --warn: #B4530F;
-    --warn-soft: #FCEBDC;
-    --danger: #B42318;
-    --danger-soft: #FDE7E5;
-    --radius: 14px;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    font-size: 20px; line-height: 1.5;
-    text-transform: uppercase;
-  }
-  button, input, select, textarea { font: inherit; text-transform: uppercase; }
-  ::placeholder { text-transform: uppercase; }
-  .hidden { display: none !important; }
-
-  .btn {
-    min-height: 52px; padding: 0 22px; border-radius: 12px; border: 2px solid var(--line);
-    background: var(--card); color: var(--ink); font-weight: 600; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 8px;
-  }
-  .btn:hover { border-color: #C9CDD4; }
-  .zoom { display: inline-flex; gap: 6px; }
-  .boas-vindas { background: var(--accent-soft); border: 2px solid #C9D5F7; border-radius: var(--radius); padding: 20px 22px; color: var(--ink); }
-  .boas-vindas h2 { margin: 0 0 6px; font-size: 28px; color: var(--accent-dark); }
-  .boas-vindas .frase { margin: 0 0 12px; font-size: 23px; font-weight: 700; color: #7A2E8E; }
-  .boas-vindas p { margin: 0; font-size: 21px; font-weight: 600; }
-  /* alerta de consulta próxima: pisca em vermelho */
-  .alerta { position: sticky; top: 8px; z-index: 5; border-radius: var(--radius); padding: 20px 22px; color: #fff;
-    background: var(--danger); box-shadow: 0 8px 24px rgba(180,35,24,0.35); display: flex; flex-direction: column; gap: 12px;
-    animation: piscar 1.2s ease-in-out infinite; }
-  .alerta strong { font-size: 30px; line-height: 1.2; }
-  .alerta span { font-size: 22px; font-weight: 700; }
-  .alerta .btn { align-self: flex-start; background: #fff; color: var(--danger); border-color: #fff; font-weight: 800; min-height: 60px; font-size: 22px; }
-  @keyframes piscar { 0%, 100% { background: #B42318; } 50% { background: #E8533F; } }
-  @media (prefers-reduced-motion: reduce) { .alerta { animation: none; } }
-  /* celular: nada pode passar da largura da tela */
-  .field input, .field select, .field textarea { width: 100%; min-width: 0; }
-  dialog { overflow-x: hidden; }
-  .tabs { flex-wrap: wrap; max-width: 100%; }
-  .busca { min-width: 0; }
-  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
-  .btn-danger { color: var(--danger); background: var(--danger-soft); border-color: #F3B4AE; }
-  .btn-danger-forte { background: var(--danger); border-color: var(--danger); color: #fff; }
-  .btn-ghost { background: transparent; border-color: transparent; }
-  .btn-icon { width: 52px; font-size: 28px; padding: 0; justify-content: center; }
-
-  /* Login */
-  .login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
-  .login {
-    width: 100%; max-width: 460px; background: var(--card); border-radius: 20px;
-    padding: 32px; display: flex; flex-direction: column; gap: 16px;
-    box-shadow: 0 10px 30px rgba(22,24,29,0.06);
-  }
-  .login h1 { margin: 0; font-size: 32px; }
-  .login p { margin: 0; color: var(--muted); }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label { font-weight: 700; font-size: 19px; }
-  .field input, .field select, .field textarea {
-    min-height: 54px; padding: 10px 14px; border: 2px solid #9AA0AB; border-radius: 10px;
-    background: #fff; color: var(--ink);
-  }
-  .field textarea { resize: vertical; min-height: 110px; }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-  .msg { padding: 12px 14px; border-radius: 10px; font-size: 18px; font-weight: 600; }
-  .msg-erro { background: var(--danger-soft); color: var(--danger); }
-  .msg-info { background: var(--accent-soft); color: var(--accent-dark); }
-
-  /* App */
-  header.top {
-    background: var(--card); border-bottom: 1px solid var(--line);
-    padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-  }
-  header.top h1 { margin: 0; font-size: 30px; }
-  .top-right { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 18px; flex-wrap: wrap; }
-
-  main.app {
-    max-width: 1400px; margin: 0 auto; padding: 24px;
-    display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;
-  }
-  .side { order: 2; flex: 1 1 340px; max-width: 470px; display: flex; flex-direction: column; gap: 16px; }
-  .content { order: 1; flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-  @media (max-width: 760px) { .side { max-width: none; } main.app { padding: 16px; } }
-
-  .panel { background: var(--card); border-radius: var(--radius); padding: 18px; }
-
-  /* Calendário */
-  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .cal-head h2 { margin: 0; font-size: 24px; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-  .cal-wd { text-align: center; font-size: 17px; font-weight: 700; color: var(--muted); padding: 4px 0; }
-  .cal-day {
-    height: 58px; border: 0; border-radius: 12px; background: transparent; cursor: pointer; font-size: 20px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-    font-weight: 600; color: var(--ink);
-  }
-  .cal-day:hover { background: var(--bg); }
-  .cal-day.fora { color: #80868F; }
-  .cal-day.hoje { background: var(--accent-soft); color: var(--accent-dark); font-weight: 800; }
-  .cal-day.sel { background: var(--ink); color: #fff; }
-  .cal-dot { width: 9px; height: 9px; border-radius: 5px; background: var(--accent); }
-  .cal-day.sel .cal-dot { background: #fff; }
-  .cal-dot.vazio { background: transparent; }
-
-  .resumo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .resumo div { background: var(--card); border-radius: var(--radius); padding: 14px 16px; }
-  .resumo strong { display: block; font-size: 34px; }
-  .resumo span { color: var(--muted); font-size: 18px; }
-
-  /* Lista */
-  .toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-  .tabs { display: inline-flex; background: var(--card); border-radius: 12px; padding: 4px; gap: 4px; }
-  .tabs button { min-height: 50px; border: 0; background: transparent; border-radius: 9px; padding: 0 18px; font-weight: 600; color: var(--muted); cursor: pointer; }
-  .tabs button[aria-pressed="true"] { background: var(--ink); color: #fff; }
-  .busca { min-height: 52px; padding: 0 14px; border: 2px solid #9AA0AB; border-radius: 10px; min-width: 240px; flex: 1; max-width: 380px; }
-  .filtro-dia { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-soft); color: var(--accent-dark); border-radius: 999px; padding: 6px 8px 6px 16px; font-weight: 700; font-size: 19px; }
-  .filtro-dia button { border: 0; background: transparent; cursor: pointer; color: inherit; min-height: 40px; min-width: 40px; border-radius: 20px; font-size: 20px; }
-
-  .grupo-mes { margin: 10px 0 -2px; font-size: 19px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-  .consulta {
-    background: var(--card); border-radius: var(--radius); padding: 20px 22px;
-    display: flex; gap: 22px; align-items: flex-start; border: 2px solid transparent; text-align: left; width: 100%; color: var(--ink);
-  }
-  .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-  .consulta.passada { opacity: 0.85; }
-  .data-box { width: 86px; flex-shrink: 0; text-align: center; border-radius: 12px; background: var(--bg); padding: 8px 0; }
-  .data-box .dia { display: block; font-size: 36px; font-weight: 800; line-height: 1.1; }
-  .data-box .mes { display: block; font-size: 17px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
-  .consulta-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-  .consulta-titulo { font-size: 26px; font-weight: 800; }
-  .consulta-linha { color: var(--ink); font-size: 21px; overflow-wrap: anywhere; }
-  .consulta-obs { font-size: 20px; background: #FFF1C7; border-radius: 10px; padding: 10px 14px; margin-top: 4px; white-space: pre-line; }
-  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-  .tag { font-size: 17px; font-weight: 800; padding: 5px 14px; border-radius: 999px; }
-  .tag-agendada { background: var(--accent-soft); color: var(--accent-dark); }
-  .tag-realizada { background: var(--ok-soft); color: var(--ok); }
-  .tag-cancelada { background: var(--danger-soft); color: var(--danger); }
-  .tag-quando { background: var(--warn-soft); color: var(--warn); }
-  .vazio-lista { background: var(--card); border-radius: var(--radius); padding: 40px; font-size: 22px; text-align: center; color: var(--muted); }
-
-  /* Diálogo */
-  dialog { border: 0; border-radius: 20px; padding: 0; width: min(720px, calc((100vw - 32px) / var(--z, 1))); max-height: calc((100vh - 32px) / var(--z, 1)); overflow-y: auto; color: var(--ink); }
-  dialog::backdrop { background: rgba(22,24,29,0.45); }
-  .dlg { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
-  .dlg h2 { margin: 0; font-size: 28px; }
-  .linha2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  @media (max-width: 640px) { .linha2 { grid-template-columns: 1fr; } }
-  .dlg-acoes { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 6px; }
-  .dlg-acoes div { display: flex; gap: 8px; }
-
-  @media print {
-    header.top, .side, .toolbar, .no-print { display: none !important; }
-    body { background: #fff; }
-    main.app { padding: 0; }
-    .consulta { border: 1px solid #ccc; break-inside: avoid; }
-  }
+:root{
+  --bg:#f2f5fa;--card:#fff;--ink:#101828;--muted:#344054;--line:#b8c3d4;
+  --blue:#1746a2;--blue-dark:#103477;--blue-soft:#e4edff;
+  --green:#087443;--green-soft:#dff5e9;--red:#b42318;--red-soft:#ffebe9;
+  --amber:#8a4b08;--amber-soft:#fff1d6;--radius:18px;--font-scale:1;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;font-size:calc(21px * var(--font-scale));line-height:1.5}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+header{background:#fff;border-bottom:2px solid var(--line);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+header h1{font-size:calc(32px * var(--font-scale));margin:0;color:var(--blue-dark)}
+.header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+main{max-width:1450px;margin:auto;padding:22px;display:grid;gap:20px}
+.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+h2{font-size:calc(27px * var(--font-scale));margin:0 0 14px}
+h3{font-size:calc(23px * var(--font-scale));margin:0 0 8px}
+.btn{min-height:58px;padding:10px 20px;border:2px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font-weight:800}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px solid #f0a000;outline-offset:3px}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-green{background:var(--green);border-color:var(--green);color:#fff}
+.btn-red{background:var(--red-soft);border-color:#e7a39d;color:var(--red)}
+.btn-large{width:100%;min-height:76px;font-size:calc(26px * var(--font-scale))}
+.btn-small{min-height:48px;padding:8px 14px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.metric{background:var(--blue-soft);border-radius:14px;padding:16px}
+.metric strong{display:block;font-size:calc(38px * var(--font-scale));line-height:1.15;color:var(--blue-dark)}
+.metric span{font-weight:800;color:var(--muted)}
+.next-card{background:#e8f4ff;border:3px solid #7ca7e8;border-radius:18px;padding:22px}
+.next-card .next-time{font-size:calc(42px * var(--font-scale));font-weight:900;color:var(--blue-dark);line-height:1.2}
+.next-card p{margin:5px 0;font-weight:700}
+.action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.action-grid button{min-height:82px;font-size:calc(23px * var(--font-scale))}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+input,select,textarea{width:100%;min-width:0;min-height:58px;border:2px solid #8794a8;border-radius:12px;padding:12px 14px;background:#fff;color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+label{display:block;font-weight:900;margin-bottom:6px}
+.field{margin-bottom:14px}
+.search{flex:1;min-width:220px}
+.list{display:grid;gap:12px}
+.appointment{display:grid;grid-template-columns:100px 1fr;gap:18px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:18px}
+.datebox{background:var(--blue-soft);border-radius:14px;text-align:center;padding:10px 4px;align-self:start}
+.datebox strong{display:block;font-size:calc(40px * var(--font-scale));line-height:1.1;color:var(--blue-dark)}
+.datebox span{font-weight:900;color:var(--muted)}
+.appointment-title{font-size:calc(25px * var(--font-scale));font-weight:900}
+.detail{font-weight:700;overflow-wrap:anywhere}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tag{display:inline-block;padding:5px 12px;border-radius:99px;font-size:calc(17px * var(--font-scale));font-weight:900}
+.tag-agendada{background:var(--blue-soft);color:var(--blue-dark)}
+.tag-realizada{background:var(--green-soft);color:var(--green)}
+.tag-cancelada{background:var(--red-soft);color:var(--red)}
+.item-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.notice{padding:18px;border-radius:16px;font-weight:900}
+.notice-red{background:var(--red);color:#fff;animation:pulse 1.2s infinite}
+.notice-amber{background:var(--amber-soft);color:var(--amber)}
+@keyframes pulse{50%{background:#e04b3d}}
+.empty{text-align:center;padding:30px;background:#fff;border-radius:16px;color:var(--muted);font-weight:800}
+dialog{border:0;border-radius:20px;padding:0;width:min(760px,calc(100vw - 24px));max-height:90vh;overflow:auto;color:var(--ink)}
+dialog::backdrop{background:#101828aa}
+.dialog-body{padding:24px}
+.dialog-actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-top:18px}
+.dialog-actions div{display:flex;gap:10px;flex-wrap:wrap}
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:18px}
+.login{width:min(520px,100%);background:#fff;padding:28px;border-radius:20px;box-shadow:0 8px 30px #10182818}
+.login h1{font-size:34px;margin-top:0}
+.help{color:var(--muted);font-size:.9em}
+.status-message{padding:12px;border-radius:10px;background:var(--red-soft);color:var(--red);font-weight:800}
+footer{text-align:center;color:var(--muted);font-size:16px;padding:10px}
+.easy-mode .secondary-info{display:none}
+.easy-mode .appointment{padding:22px}
+.easy-mode .btn{min-height:64px}
+@media(max-width:760px){main{padding:12px}.home-grid,.action-grid{grid-template-columns:1fr}.appointment{grid-template-columns:78px 1fr;padding:12px}.datebox strong{font-size:32px}header{padding:12px}.header-actions{width:100%}.header-actions .btn{flex:1}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
+@media print{header,.no-print,.item-actions,footer{display:none!important}body{background:#fff}main{padding:0}.appointment{break-inside:avoid}}
 </style>
 </head>
 <body>
-
-<!-- Aviso de configuração -->
-<div id="tela-config" class="login-wrap hidden">
-  <div class="login">
-    <h1>Falta configurar</h1>
-    <p>Abra o arquivo <strong>index.html</strong> e preencha <code>SUPABASE_URL</code> e <code>SUPABASE_KEY</code> com os dados do seu projeto Supabase (veja o LEIAME).</p>
-  </div>
-</div>
-
-<!-- Login -->
-<div id="tela-login" class="login-wrap hidden">
-  <form class="login" id="form-login">
+<div id="login-screen" class="login-wrap hidden">
+  <form id="login-form" class="login">
     <h1>Agenda de Consultas</h1>
-    <p>Entre para ver e cadastrar as consultas.</p>
-    <div class="field">
-      <label for="login-email">Nome</label>
-      <input id="login-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
-    </div>
-    <div class="field">
-      <label for="login-senha">Senha</label>
-      <input id="login-senha" type="password" autocomplete="current-password" required>
-    </div>
-    <div id="login-msg" class="msg msg-erro hidden" role="alert"></div>
-    <button class="btn btn-primary" type="submit" style="justify-content:center">Entrar</button>
+    <p>Entre para acessar sua agenda.</p>
+    <div class="field"><label for="login-name">Nome ou e-mail</label><input id="login-name" autocomplete="username" required></div>
+    <div class="field"><label for="login-password">Senha</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+    <div id="login-error" class="status-message hidden" role="alert"></div>
+    <button class="btn btn-primary btn-large" type="submit">ENTRAR</button>
+    <p class="help">O acesso utiliza os usuários já cadastrados no Supabase.</p>
   </form>
 </div>
-
-<!-- App -->
-<div id="tela-app" class="hidden">
-  <header class="top">
-    <h1>Agenda de Consultas</h1>
-    <div class="top-right">
-      <span id="usuario"></span>
-      <span class="zoom" role="group" aria-label="Tamanho da letra">
-        <button class="btn" id="zoom-menos" type="button" aria-label="Diminuir letras">A−</button>
-        <button class="btn" id="zoom-mais" type="button" aria-label="Aumentar letras" style="font-size:24px">A+</button>
-      </span>
-      <button class="btn" id="btn-imprimir" type="button">Imprimir</button>
-      <button class="btn" id="btn-sair" type="button">Sair</button>
+<div id="config-screen" class="login-wrap hidden"><div class="login"><h1>Configuração necessária</h1><p>Preencha SUPABASE_URL e SUPABASE_KEY no início do código.</p></div></div>
+<div id="app" class="hidden">
+<header>
+  <h1>AGENDA DE CONSULTAS</h1>
+  <div class="header-actions no-print">
+    <button class="btn" id="font-down" aria-label="Diminuir letras">A−</button>
+    <button class="btn" id="font-up" aria-label="Aumentar letras">A+</button>
+    <button class="btn" id="easy-toggle" aria-pressed="true">MODO FÁCIL: ATIVO</button>
+    <button class="btn" id="sound-toggle" aria-pressed="false">🔔 ATIVAR SOM</button>
+    <button class="btn" id="print-btn">IMPRIMIR</button>
+    <button class="btn" id="logout-btn">SAIR</button>
+  </div>
+</header>
+<main>
+  <section class="panel">
+    <div class="topline"><div><h2 id="greeting">BOM DIA!</h2><p id="frase" style="margin:0 0 6px;font-weight:900;color:#7A2E8E;font-size:calc(23px * var(--font-scale))"></p><p id="today-label" class="help"></p></div><button class="btn btn-small no-print" id="listen-home">🔊 OUVIR RESUMO</button></div>
+    <div id="alert-box" class="notice notice-red hidden" role="alert" aria-live="assertive"></div>
+    <div class="next-card" id="next-card">
+      <h2>PRÓXIMA CONSULTA</h2><div id="next-content">Carregando consultas...</div>
+      <button class="btn btn-small no-print" id="listen-next">🔊 OUVIR PRÓXIMA CONSULTA</button>
     </div>
-  </header>
-
-  <main class="app">
-    <aside class="side">
-
-      <div class="resumo">
-        <div><strong id="n-proximas">0</strong><span>próximas consultas</span></div>
-        <div><strong id="n-mes">0</strong><span>neste mês</span></div>
+    <div class="home-grid" style="margin-top:14px">
+      <div class="metric"><strong id="count-upcoming">0</strong><span>CONSULTAS FUTURAS</span></div>
+      <div class="metric"><strong id="count-month">0</strong><span>NESTE MÊS</span></div>
+      <div class="metric"><strong id="count-today">0</strong><span>HOJE</span></div>
+    </div>
+  </section>
+  <section class="action-grid no-print">
+    <button class="btn btn-primary btn-large" id="new-btn">＋ NOVA CONSULTA</button>
+    <button class="btn btn-green btn-large" id="show-upcoming">MINHAS CONSULTAS</button>
+    <button class="btn btn-large" id="show-history">HISTÓRICO</button>
+  </section>
+  <section class="panel" id="list-panel">
+    <h2 id="list-heading">MINHAS CONSULTAS</h2>
+    <div class="toolbar no-print">
+      <div class="tabs" role="group" aria-label="Filtro de consultas">
+        <button class="btn btn-small" data-filter="upcoming" aria-pressed="true">PRÓXIMAS</button>
+        <button class="btn btn-small" data-filter="past" aria-pressed="false">ANTERIORES</button>
+        <button class="btn btn-small" data-filter="all" aria-pressed="false">TODAS</button>
       </div>
-    </aside>
-
-    <section class="content">
-      <div class="alerta hidden" id="alerta" role="alert">
-        <strong id="alerta-titulo"></strong>
-        <span id="alerta-texto"></span>
-        <button class="btn" id="alerta-ok" type="button">✔ Entendi</button>
-      </div>
-      <section class="boas-vindas" id="boas-vindas" aria-live="polite">
-        <h2 id="bv-saudacao"></h2>
-        <p class="frase" id="bv-frase"></p>
-        <p id="bv-texto"></p>
-      </section>
-      <button class="btn btn-primary" id="btn-nova" type="button" style="justify-content:center; min-height:64px; font-size:24px">+ Nova consulta</button>
-      <div class="toolbar">
-        <div class="tabs" role="group" aria-label="Mostrar">
-          <button type="button" data-filtro="proximas" aria-pressed="true">Próximas</button>
-          <button type="button" data-filtro="anteriores" aria-pressed="false">Anteriores</button>
-          <button type="button" data-filtro="todas" aria-pressed="false">Todas</button>
-        </div>
-        <input class="busca" id="busca" type="search" placeholder="Buscar médico, especialidade…" aria-label="Buscar">
-      </div>
-      <div id="filtro-dia-wrap" class="hidden">
-        <span class="filtro-dia"><span id="filtro-dia-txt"></span><button type="button" id="limpar-dia" aria-label="Limpar filtro do dia">✕</button></span>
-      </div>
-      <div id="app-msg" class="msg msg-erro hidden" role="alert"></div>
-      <div id="lista" style="display:flex; flex-direction:column; gap:12px"></div>
-    </section>
-  </main>
+      <input class="search" id="search" type="search" placeholder="BUSCAR MÉDICO OU EXAME" aria-label="Buscar consulta">
+    </div>
+    <div id="app-error" class="status-message hidden" role="alert"></div>
+    <div id="appointment-list" class="list" style="margin-top:14px"></div>
+  </section>
+</main>
+<footer>AGENDA DE CONSULTAS</footer>
 </div>
 
-<!-- Formulário -->
-<dialog id="dlg">
-  <form class="dlg" id="form-consulta" method="dialog">
-    <h2 id="dlg-titulo">Nova consulta</h2>
-    <div class="linha2">
-      <div class="field">
-        <label for="f-data">Data</label>
-        <input id="f-data" type="date" required>
-      </div>
-      <div class="field">
-        <label for="f-hora">Horário</label>
-        <input id="f-hora" type="time" required>
-      </div>
-    </div>
-    <div class="linha2">
-      <div class="field">
-        <label for="f-esp">Especialidade / exame</label>
-        <input id="f-esp" type="text" list="lista-esp" placeholder="Ex.: Cardiologista" required>
-        <datalist id="lista-esp"></datalist>
-      </div>
-      <div class="field">
-        <label for="f-medico">Médico(a)</label>
-        <input id="f-medico" type="text" placeholder="Ex.: Dra. Ana Souza">
-      </div>
-    </div>
-    <div class="field">
-      <label for="f-local">Local / endereço</label>
-      <input id="f-local" type="text" placeholder="Clínica, rua, número, bairro">
-    </div>
-    <div class="linha2">
-      <div class="field">
-        <label for="f-tel">Telefone da clínica</label>
-        <input id="f-tel" type="tel" placeholder="(11) 0000-0000">
-      </div>
-      <div class="field">
-        <label for="f-status">Situação</label>
-        <select id="f-status">
-          <option value="agendada">Agendada</option>
-          <option value="realizada">Realizada</option>
-          <option value="cancelada">Cancelada</option>
-        </select>
-      </div>
-    </div>
-    <div class="field">
-      <label for="f-obs">O que levar / observações</label>
-      <textarea id="f-obs" placeholder="Ex.: levar exames de sangue, cartão do convênio, ir em jejum"></textarea>
-    </div>
-    <div id="dlg-msg" class="msg msg-erro hidden" role="alert"></div>
-    <div class="dlg-acoes">
-      <button class="btn btn-danger" id="btn-excluir" type="button">Excluir</button>
-      <div>
-        <button class="btn" id="btn-cancelar" type="button">Cancelar</button>
-        <button class="btn btn-primary" id="btn-salvar" type="submit">Salvar</button>
-      </div>
-    </div>
-  </form>
+<dialog id="appointment-dialog">
+<form id="appointment-form" class="dialog-body">
+  <h2 id="form-title">NOVA CONSULTA</h2>
+  <p class="help">Preencha os campos abaixo. Os campos com * são obrigatórios.</p>
+  <div class="field"><label for="date">DATA *</label><input id="date" type="date" required></div>
+  <div class="field"><label for="time">HORÁRIO *</label><input id="time" type="time" required></div>
+  <div class="field"><label for="specialty">MÉDICO, ESPECIALIDADE OU EXAME *</label><input id="specialty" list="specialties" required placeholder="EX.: CARDIOLOGISTA"><datalist id="specialties"><option>CARDIOLOGISTA</option><option>CLÍNICO GERAL</option><option>DERMATOLOGISTA</option><option>DENTISTA</option><option>EXAME DE SANGUE</option><option>OFTALMOLOGISTA</option><option>ORTOPEDISTA</option></datalist></div>
+  <div class="field"><label for="doctor">NOME DO MÉDICO</label><input id="doctor" placeholder="NOME DO MÉDICO"></div>
+  <div class="field"><label for="place">LOCAL / ENDEREÇO</label><input id="place" placeholder="NOME DA CLÍNICA E ENDEREÇO"></div>
+  <div class="field"><label for="phone">TELEFONE DA CLÍNICA</label><input id="phone" type="tel" placeholder="TELEFONE"></div>
+  <div class="field"><label for="status">SITUAÇÃO</label><select id="status"><option value="agendada">AGENDADA</option><option value="realizada">REALIZADA</option><option value="cancelada">CANCELADA</option></select></div>
+  <div class="field"><label for="notes">O QUE LEVAR / OBSERVAÇÕES</label><textarea id="notes" placeholder="EX.: LEVAR EXAMES, DOCUMENTOS OU IR EM JEJUM"></textarea></div>
+  <div id="form-error" class="status-message hidden" role="alert"></div>
+  <div class="dialog-actions"><button type="button" class="btn btn-red" id="delete-from-form">EXCLUIR</button><div><button type="button" class="btn" id="cancel-form">CANCELAR</button><button type="submit" class="btn btn-primary" id="save-btn">SALVAR CONSULTA</button></div></div>
+</form>
 </dialog>
-
-<!-- Confirmar exclusão -->
-<dialog id="dlg-excluir">
-  <div class="dlg">
-    <h2>Excluir esta consulta?</h2>
-    <p id="exc-texto" style="margin:0; font-size:22px; font-weight:700"></p>
-    <p style="margin:0; color: var(--muted)">Depois de excluir, não dá para desfazer.</p>
-    <div id="exc-msg" class="msg msg-erro hidden" role="alert"></div>
-    <div class="dlg-acoes">
-      <button class="btn" id="exc-nao" type="button">Não, voltar</button>
-      <button class="btn btn-danger-forte" id="exc-sim" type="button">Sim, excluir</button>
-    </div>
-  </div>
-</dialog>
+<dialog id="confirm-dialog"><div class="dialog-body"><h2>CONFIRMAR EXCLUSÃO?</h2><p id="confirm-text"></p><div class="dialog-actions"><button class="btn" id="keep-btn">NÃO, VOLTAR</button><button class="btn btn-red" id="confirm-delete">SIM, EXCLUIR</button></div></div></dialog>
 
 <script type="module">
-// ===== CONFIGURAÇÃO — preencha com os dados do seu projeto Supabase =====
-// Supabase › Project Settings › API (ou "Connect"): Project URL e a chave anon/publishable.
 const SUPABASE_URL = 'https://wxckgjygovrotprdshxk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hy_MRTUG1rtkrxiBWZuGCA_q_RirhCB';
-// =========================================================================
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-const $ = (id) => document.getElementById(id);
-const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-const MESES_CURTOS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-const DIAS_SEMANA = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-const ESPECIALIDADES = ['Cardiologista','Clínico geral','Dermatologista','Endocrinologista','Fisioterapia','Gastroenterologista','Geriatra','Exame de sangue','Neurologista','Oftalmologista','Ortopedista','Otorrino','Pneumologista','Urologista','Dentista'];
-
-const estado = {
-  consultas: [],
-  mesVisto: inicioMes(new Date()),
-  diaSel: null,          // 'AAAA-MM-DD' ou null
-  filtro: 'proximas',
-  busca: '',
-  editando: null,
-};
-
-if (SUPABASE_URL.startsWith('COLE_') || SUPABASE_KEY.startsWith('COLE_')) {
-  $('tela-config').classList.remove('hidden');
-  throw new Error('Supabase não configurado');
+const $ = id => document.getElementById(id);
+const state = {items:[], filter:'upcoming', search:'', editing:null, deleting:null, font:1, easy:true, soundEnabled:false, soundPlayed:new Set()};
+let audioContext=null;
+const DOMAIN='agenda.local';
+if(!SUPABASE_URL.startsWith('https://')||!SUPABASE_KEY){$('config-screen').classList.remove('hidden');throw new Error('Configure o Supabase')}
+const sb=createClient(new URL(SUPABASE_URL.trim()).origin,SUPABASE_KEY.trim());
+function showError(el,msg){el.textContent=msg;el.classList.toggle('hidden',!msg)}
+function pad(n){return String(n).padStart(2,'0')}
+function dateKey(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function dateTime(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function nameToEmail(name){const v=name.trim().toLowerCase();if(v.includes('@'))return v;return v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'.').replace(/^\.+|\.+$/g,'')+'@'+DOMAIN}
+function say(text){if(!('speechSynthesis' in window)){alert('A leitura por voz não está disponível neste navegador.');return}window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='pt-BR';u.rate=.88;window.speechSynthesis.speak(u)}
+function playAlertSound(){if(!state.soundEnabled||!audioContext)return;try{if(audioContext.state==='suspended')audioContext.resume();const start=audioContext.currentTime;[0,.28,.56].forEach((offset,i)=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.value=i===1?880:660;gain.gain.setValueAtTime(.0001,start+offset);gain.gain.exponentialRampToValueAtTime(.22,start+offset+.025);gain.gain.exponentialRampToValueAtTime(.0001,start+offset+.22);osc.connect(gain);gain.connect(audioContext.destination);osc.start(start+offset);osc.stop(start+offset+.24)})}catch(e){console.warn('Não foi possível tocar o alerta sonoro',e)}}
+async function enableSound(){try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx){alert('O som de alerta não é compatível com este navegador.');return}audioContext=audioContext||new AudioCtx();await audioContext.resume();state.soundEnabled=true;$('sound-toggle').textContent='🔔 SOM ATIVO';$('sound-toggle').setAttribute('aria-pressed','true');playAlertSound();const now=new Date();const active=state.items.find(x=>x.status==='agendada'&&x.when>=now&&(x.when-now)/60000<=120);if(active&&!state.soundPlayed.has(String(active.id))){state.soundPlayed.add(String(active.id));setTimeout(playAlertSound,900)}}catch(e){alert('Não foi possível ativar o som. Toque novamente no botão.')}}
+function fmtDate(d){return d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}
+const FRASES=['COMO ESTÁ O CASAL MAIS FOFO DO BRASIL? 💕','QUE ALEGRIA VER VOCÊS POR AQUI! 😊','VOCÊS SÃO O ORGULHO DA FAMÍLIA! ❤️','O CASAL MAIS LINDO DE SÃO PAULO CHEGOU! 🌹','HOJE É UM ÓTIMO DIA PARA SORRIR JUNTOS! 😄','JUNTOS, VOCÊS DEIXAM TUDO MAIS BONITO! 💐','QUE DEUS ABENÇOE O DIA DE VOCÊS! 🙏','SAÚDE E MUITO AMOR PARA O CASAL MAIS QUERIDO! 💖','VOCÊS SÃO EXEMPLO DE AMOR E PARCERIA! 👫','BEM-VINDOS! A FAMÍLIA AMA MUITO VOCÊS! 🥰','QUE O DIA DE VOCÊS SEJA LEVE E CHEIO DE PAZ! 🌤️','CUIDAR DA SAÚDE É CUIDAR DE QUEM A GENTE AMA! 💙','MAIS UM DIA AO LADO DO CASAL MAIS FOFO DO MUNDO! 🌎','VOCÊS MERECEM TODO O CARINHO DO MUNDO! 🤗','UM CAFÉ, UM SORRISO E O CASAL MAIS QUERIDO! ☕','QUE BOM TER VOCÊS COM A GENTE! 🌻'];
+function escolherFrase(){let ultima=-1;try{const v=localStorage.getItem('agenda-ultima-frase');if(v!==null)ultima=Number(v)}catch(e){}let i=ultima<0?0:Math.floor(Math.random()*FRASES.length);if(FRASES.length>1&&i===ultima)i=(i+1)%FRASES.length;try{localStorage.setItem('agenda-ultima-frase',String(i))}catch(e){}return FRASES[i]}
+function currentGreeting(){const h=new Date().getHours();return h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE'}
+function setupFont(){document.documentElement.style.setProperty('--font-scale',state.font);$('font-down').disabled=state.font<=1;$('font-up').disabled=state.font>=1.8}
+function setEasy(on){state.easy=on;document.body.classList.toggle('easy-mode',on);$('easy-toggle').textContent='MODO FÁCIL: '+(on?'ATIVO':'DESATIVADO');$('easy-toggle').setAttribute('aria-pressed',String(on))}
+function toAppointment(row){return {...row,when:new Date(row.data_hora)}}
+function sortItems(items){return items.sort((a,b)=>a.when-b.when)}
+function filteredItems(){
+ const now=new Date(),today=new Date();today.setHours(0,0,0,0);
+ let a=state.items.slice();
+ if(state.filter==='upcoming')a=a.filter(x=>x.when>=today&&x.status!=='cancelada');
+ if(state.filter==='past')a=a.filter(x=>x.when<now||x.status==='realizada'||x.status==='cancelada').reverse();
+ if(state.search){const q=state.search.toLowerCase();a=a.filter(x=>[x.especialidade,x.medico,x.local,x.observacoes].some(v=>(v||'').toLowerCase().includes(q)))}
+ return a;
 }
-
-// Usa só o endereço base do projeto, mesmo que a URL colada tenha /rest/v1 ou outro caminho
-const sb = createClient(new URL(SUPABASE_URL.trim()).origin, SUPABASE_KEY.trim());
-
-// ---------- utilidades ----------
-function inicioMes(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-function pad(n) { return String(n).padStart(2, '0'); }
-function chaveDia(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-function hora(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function renderHome(){
+ const now=new Date(),today=new Date();today.setHours(0,0,0,0);
+ $('greeting').textContent=currentGreeting()+', SR. ROBERTO E ANTONIA!';
+ if(!state.frase)state.frase=escolherFrase();$('frase').textContent=state.frase;
+ $('today-label').textContent=fmtDate(now);
+ const upcoming=state.items.filter(x=>x.status==='agendada'&&x.when>=now).sort((a,b)=>a.when-b.when);
+ const next=upcoming[0];
+ $('count-upcoming').textContent=upcoming.length;
+ $('count-month').textContent=state.items.filter(x=>x.status!=='cancelada'&&x.when.getMonth()===now.getMonth()&&x.when.getFullYear()===now.getFullYear()).length;
+ $('count-today').textContent=state.items.filter(x=>x.status==='agendada'&&dateKey(x.when)===dateKey(now)).length;
+ if(!next){$('next-content').innerHTML='<p>NÃO HÁ CONSULTAS FUTURAS CADASTRADAS.</p>';$('listen-next').disabled=true}
+ else{$('listen-next').disabled=false;$('next-content').innerHTML=`<div class="next-time">${dateTime(next.when)}</div><p>${escapeHtml(next.especialidade)}${next.medico?' — '+escapeHtml(next.medico):''}</p><p>${escapeHtml(fmtDate(next.when))}</p>${next.local?`<p>${escapeHtml(next.local)}</p>`:''}`; $('listen-next').onclick=()=>say(`Sua próxima consulta é ${fmtDate(next.when)}, às ${dateTime(next.when)}, ${next.especialidade}${next.medico?', com '+next.medico:''}${next.local?', no endereço '+next.local:''}.`)}
+ const alertItem=upcoming.find(x=>(x.when-now)/60000<=120);
+ if(alertItem){$('alert-box').classList.remove('hidden');$('alert-box').textContent=`ATENÇÃO! VOCÊ TEM UMA CONSULTA ${alertItem.when.toDateString()===now.toDateString()?'HOJE':'EM BREVE'}, ÀS ${dateTime(alertItem.when)}: ${alertItem.especialidade}.`;$('alert-box').onclick=()=>say($('alert-box').textContent);const alertId=String(alertItem.id);if(state.soundEnabled&&!state.soundPlayed.has(alertId)){state.soundPlayed.add(alertId);playAlertSound()}}
+ else $('alert-box').classList.add('hidden');
 }
-function quando(d) {
-  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-  const alvo = new Date(d); alvo.setHours(0, 0, 0, 0);
-  const dif = Math.round((alvo - hoje) / 86400000);
-  if (dif === 0) return 'Hoje';
-  if (dif === 1) return 'Amanhã';
-  if (dif > 1 && dif <= 30) return 'Em ' + dif + ' dias';
-  return null;
+function renderList(){
+ const items=filteredItems();$('list-heading').textContent=state.filter==='past'?'HISTÓRICO':'MINHAS CONSULTAS';
+ document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===state.filter)));
+ if(!items.length){$('appointment-list').innerHTML='<div class="empty">NENHUMA CONSULTA ENCONTRADA.</div>';return}
+ $('appointment-list').innerHTML=items.map(c=>{
+ const status=c.status||'agendada';const label={agendada:'AGENDADA',realizada:'REALIZADA',cancelada:'CANCELADA'}[status]||status.toUpperCase();
+ return `<article class="appointment"><div class="datebox"><strong>${pad(c.when.getDate())}</strong><span>${c.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div><div class="appointment-title">${escapeHtml(c.especialidade)}${c.medico?' — '+escapeHtml(c.medico):''}</div><div class="detail">${escapeHtml(fmtDate(c.when))} • ÀS ${dateTime(c.when)}</div>${c.local?`<div class="detail">LOCAL: ${escapeHtml(c.local)}</div>`:''}${c.telefone?`<div class="detail">TELEFONE: ${escapeHtml(c.telefone)}</div>`:''}${c.observacoes?`<div class="detail">OBSERVAÇÕES: ${escapeHtml(c.observacoes)}</div>`:''}<div class="tags"><span class="tag tag-${status}">${label}</span></div><div class="item-actions no-print"><button class="btn btn-small" data-edit="${escapeHtml(c.id)}">EDITAR</button><button class="btn btn-small btn-red" data-delete="${escapeHtml(c.id)}">EXCLUIR</button><button class="btn btn-small" data-speak="${escapeHtml(c.id)}">🔊 OUVIR</button></div></div></article>`
+ }).join('');
 }
-function mostrarErro(el, texto) {
-  el.textContent = texto;
-  el.classList.toggle('hidden', !texto);
+function render(){renderHome();renderList()}
+async function load(){
+ const {data,error}=await sb.from('consultas').select('*').order('data_hora',{ascending:true});
+ if(error){showError($('app-error'),'ERRO AO CARREGAR CONSULTAS: '+error.message);return}
+ showError($('app-error'),'');state.items=sortItems((data||[]).map(toAppointment));render();
 }
-
-// ---------- autenticação ----------
-$('form-login').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  mostrarErro($('login-msg'), '');
-  const { error } = await sb.auth.signInWithPassword({
-    email: nomeParaEmail($('login-email').value),
-    password: $('login-senha').value,
-  });
-  if (!error) return;
-  const m = (error.message || '').toLowerCase();
-  let texto = 'Não foi possível entrar: ' + error.message;
-  if (m.includes('invalid login credentials')) texto = 'Nome ou senha incorretos.';
-  else if (m.includes('email not confirmed')) texto = 'Usuário ainda não confirmado. No Supabase, confirme o usuário (Auto Confirm User).';
-  else if (m.includes('invalid api key') || m.includes('no api key') || m.includes('failed to fetch')) texto = 'Erro de configuração: confira a SUPABASE_URL e a SUPABASE_KEY no index.html.';
-  mostrarErro($('login-msg'), texto);
+function openForm(item){
+ state.editing=item||null;showError($('form-error'),'');$('appointment-form').reset();
+ $('form-title').textContent=item?'EDITAR CONSULTA':'NOVA CONSULTA';
+ $('delete-from-form').classList.toggle('hidden',!item);
+ if(item){$('date').value=dateKey(item.when);$('time').value=dateTime(item.when);$('specialty').value=item.especialidade||'';$('doctor').value=item.medico||'';$('place').value=item.local||'';$('phone').value=item.telefone||'';$('status').value=item.status||'agendada';$('notes').value=item.observacoes||''}
+ else{$('date').value=dateKey(new Date());$('time').value='09:00';$('status').value='agendada'}
+ $('appointment-dialog').showModal();
+}
+function requestDelete(item){if(!item)return;state.deleting=item;$('confirm-text').textContent=`${item.especialidade} — ${fmtDate(item.when)} às ${dateTime(item.when)}?`;$('confirm-dialog').showModal()}
+$('login-form').addEventListener('submit',async e=>{e.preventDefault();showError($('login-error'),'');const {error}=await sb.auth.signInWithPassword({email:nameToEmail($('login-name').value),password:$('login-password').value});if(error)showError($('login-error'),error.message.toLowerCase().includes('invalid login credentials')?'NOME OU SENHA INCORRETOS.':'NÃO FOI POSSÍVEL ENTRAR: '+error.message)});
+$('logout-btn').onclick=()=>sb.auth.signOut();
+sb.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>{const logged=!!session;$('login-screen').classList.toggle('hidden',logged);$('app').classList.toggle('hidden',!logged);if(logged){state.frase=null;load()}else state.items=[]},0)});
+$('new-btn').onclick=()=>openForm(null);
+$('cancel-form').onclick=()=>$('appointment-dialog').close();
+$('appointment-form').addEventListener('submit',async e=>{
+ e.preventDefault();const [y,m,d]=$('date').value.split('-').map(Number);const [hh,mm]=$('time').value.split(':').map(Number);const dt=new Date(y,m-1,d,hh,mm);
+ if(Number.isNaN(dt.getTime())){showError($('form-error'),'INFORME UMA DATA E UM HORÁRIO VÁLIDOS.');return}
+ const payload={data_hora:dt.toISOString(),especialidade:$('specialty').value.trim().toUpperCase(),medico:$('doctor').value.trim().toUpperCase()||null,local:$('place').value.trim().toUpperCase()||null,telefone:$('phone').value.trim()||null,status:$('status').value,observacoes:$('notes').value.trim().toUpperCase()||null};
+ $('save-btn').disabled=true;const result=state.editing?await sb.from('consultas').update(payload).eq('id',state.editing.id):await sb.from('consultas').insert(payload);$('save-btn').disabled=false;
+ if(result.error){showError($('form-error'),'NÃO FOI POSSÍVEL SALVAR: '+result.error.message);return}
+ $('appointment-dialog').close();await load();
 });
-
-// O Supabase exige e-mail; o nome digitado vira "nome@agenda.local".
-// Quem digitar um e-mail completo (com @) entra com ele normalmente.
-const DOMINIO_LOGIN = 'agenda.local';
-function nomeParaEmail(nome) {
-  const limpo = nome.trim().toLowerCase();
-  if (limpo.includes('@')) return limpo;
-  const usuario = limpo
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '.')
-    .replace(/^\.+|\.+$/g, '');
-  return usuario + '@' + DOMINIO_LOGIN;
-}
-
-$('btn-sair').addEventListener('click', () => sb.auth.signOut());
-
-sb.auth.onAuthStateChange((_evento, sessao) => {
-  // setTimeout evita chamar o Supabase dentro do próprio callback
-  setTimeout(() => entrarOuSair(sessao), 0);
-});
-
-async function entrarOuSair(sessao) {
-  const logado = !!sessao;
-  $('tela-login').classList.toggle('hidden', logado);
-  $('tela-app').classList.toggle('hidden', !logado);
-  if (logado) {
-    const email = sessao.user.email || '';
-    $('usuario').textContent = email.endsWith('@' + DOMINIO_LOGIN) ? email.split('@')[0] : email;
-    estado.nome = email.split('@')[0].replace(/[._-]+/g, ' ').trim();
-    estado.frase = escolherFrase();
-    await carregar();
-  } else {
-    estado.consultas = [];
-  }
-}
-
-// ---------- dados ----------
-async function carregar() {
-  const { data, error } = await sb.from('consultas').select('*').order('data_hora', { ascending: true });
-  if (error) {
-    mostrarErro($('app-msg'), 'Não foi possível carregar as consultas: ' + error.message);
-    return;
-  }
-  mostrarErro($('app-msg'), '');
-  estado.consultas = data.map((c) => ({ ...c, quando: new Date(c.data_hora) }));
-  render();
-}
-
-// ---------- calendário ----------
-function renderCalendario() {
-  if (!$('cal-dias')) return; // calendário retirado da tela
-  const m = estado.mesVisto;
-  $('cal-titulo').textContent = MESES[m.getMonth()] + ' ' + m.getFullYear();
-  $('cal-wd').innerHTML = ['D','S','T','Q','Q','S','S'].map((d) => '<div class="cal-wd">' + d + '</div>').join('');
-
-  const porDia = {};
-  estado.consultas.forEach((c) => {
-    if (c.status === 'cancelada') return;
-    const k = chaveDia(c.quando);
-    porDia[k] = (porDia[k] || 0) + 1;
-  });
-
-  const primeiro = new Date(m);
-  const inicio = new Date(primeiro); inicio.setDate(1 - primeiro.getDay());
-  const hojeK = chaveDia(new Date());
-  let html = '';
-  for (let i = 0; i < 42; i++) {
-    const d = new Date(inicio); d.setDate(inicio.getDate() + i);
-    if (i >= 35 && d.getMonth() !== m.getMonth()) break;
-    const k = chaveDia(d);
-    const cls = ['cal-day'];
-    if (d.getMonth() !== m.getMonth()) cls.push('fora');
-    if (k === hojeK) cls.push('hoje');
-    if (k === estado.diaSel) cls.push('sel');
-    const n = porDia[k] || 0;
-    const rotulo = d.getDate() + ' de ' + MESES[d.getMonth()] + (n ? ', ' + n + ' consulta(s)' : '');
-    html += '<button type="button" class="' + cls.join(' ') + '" data-dia="' + k + '" aria-label="' + rotulo + '">' +
-      d.getDate() + '<span class="cal-dot' + (n ? '' : ' vazio') + '"></span></button>';
-  }
-  $('cal-dias').innerHTML = html;
-}
-
-$('cal-dias') && $('cal-dias').addEventListener('click', (e) => {
-  const b = e.target.closest('[data-dia]');
-  if (!b) return;
-  estado.diaSel = estado.diaSel === b.dataset.dia ? null : b.dataset.dia;
-  render();
-});
-$('cal-ant') && $('cal-ant').addEventListener('click', () => { estado.mesVisto = new Date(estado.mesVisto.getFullYear(), estado.mesVisto.getMonth() - 1, 1); renderCalendario(); });
-$('cal-prox') && $('cal-prox').addEventListener('click', () => { estado.mesVisto = new Date(estado.mesVisto.getFullYear(), estado.mesVisto.getMonth() + 1, 1); renderCalendario(); });
-$('limpar-dia').addEventListener('click', () => { estado.diaSel = null; render(); });
-
-// ---------- lista ----------
-document.querySelectorAll('[data-filtro]').forEach((b) => {
-  b.addEventListener('click', () => {
-    estado.filtro = b.dataset.filtro;
-    document.querySelectorAll('[data-filtro]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    renderLista();
-  });
-});
-$('busca').addEventListener('input', (e) => { estado.busca = e.target.value.trim().toLowerCase(); renderLista(); });
-
-function filtrar() {
-  const agora = new Date();
-  const inicioHoje = new Date(); inicioHoje.setHours(0, 0, 0, 0);
-  let lista = estado.consultas.slice();
-
-  if (estado.diaSel) {
-    lista = lista.filter((c) => chaveDia(c.quando) === estado.diaSel);
-  } else if (estado.filtro === 'proximas') {
-    lista = lista.filter((c) => c.quando >= inicioHoje && c.status !== 'cancelada');
-  } else if (estado.filtro === 'anteriores') {
-    lista = lista.filter((c) => c.quando < agora).reverse();
-  }
-
-  if (estado.busca) {
-    lista = lista.filter((c) =>
-      [c.especialidade, c.medico, c.local, c.observacoes].some((v) => (v || '').toLowerCase().includes(estado.busca)));
-  }
-  return lista;
-}
-
-function renderLista() {
-  const lista = filtrar();
-  const agora = new Date();
-
-  $('filtro-dia-wrap').classList.toggle('hidden', !estado.diaSel);
-  if (estado.diaSel) {
-    const [a, m, d] = estado.diaSel.split('-').map(Number);
-    const dt = new Date(a, m - 1, d);
-    $('filtro-dia-txt').textContent = DIAS_SEMANA[dt.getDay()] + ', ' + d + ' de ' + MESES[m - 1];
-  }
-
-  if (!lista.length) {
-    $('lista').innerHTML = '<div class="vazio-lista">' +
-      (estado.diaSel ? 'Nenhuma consulta neste dia.' : estado.busca ? 'Nada encontrado.' : 'Nenhuma consulta aqui ainda.') + '</div>';
-    return;
-  }
-
-  let html = '';
-  let grupoAtual = '';
-  lista.forEach((c) => {
-    const d = c.quando;
-    const grupo = MESES[d.getMonth()] + ' ' + d.getFullYear();
-    if (!estado.diaSel && grupo !== grupoAtual) {
-      html += '<div class="grupo-mes">' + grupo + '</div>';
-      grupoAtual = grupo;
-    }
-    const q = c.status === 'agendada' ? quando(d) : null;
-    const passada = d < agora;
-    const statusTxt = { agendada: 'Agendada', realizada: 'Realizada', cancelada: 'Cancelada' }[c.status];
-    html +=
-      '<article class="consulta' + (passada ? ' passada' : '') + '">' +
-        '<span class="data-box"><span class="dia">' + d.getDate() + '</span><span class="mes">' + MESES_CURTOS[d.getMonth()] + '</span></span>' +
-        '<span class="consulta-info">' +
-          '<span class="consulta-titulo">' + esc(c.especialidade) + (c.medico ? ' — ' + esc(c.medico) : '') + '</span>' +
-          '<span class="consulta-linha">' + DIAS_SEMANA[d.getDay()] + ', às ' + hora(d) + '</span>' +
-          (c.local ? '<span class="consulta-linha">📍 ' + esc(c.local) + '</span>' : '') +
-          (c.telefone ? '<span class="consulta-linha">☎ ' + esc(c.telefone) + '</span>' : '') +
-          (c.observacoes ? '<span class="consulta-obs">' + esc(c.observacoes) + '</span>' : '') +
-          '<span class="tags">' +
-            (q ? '<span class="tag tag-quando">' + q + '</span>' : '') +
-            '<span class="tag tag-' + c.status + '">' + statusTxt + '</span>' +
-          '</span>' +
-          '<span class="acoes">' +
-            '<button type="button" class="btn" data-editar="' + c.id + '">✏️ Editar</button>' +
-            '<button type="button" class="btn btn-danger" data-excluir="' + c.id + '">🗑 Excluir</button>' +
-          '</span>' +
-        '</span>' +
-      '</article>';
-  });
-  $('lista').innerHTML = html;
-}
-
-$('lista').addEventListener('click', (e) => {
-  const ed = e.target.closest('[data-editar]');
-  if (ed) abrirForm(estado.consultas.find((c) => c.id === ed.dataset.editar));
-  const ex = e.target.closest('[data-excluir]');
-  if (ex) excluirConsulta(estado.consultas.find((c) => c.id === ex.dataset.excluir));
-});
-
-function renderResumo() {
-  const inicioHoje = new Date(); inicioHoje.setHours(0, 0, 0, 0);
-  const m = new Date();
-  $('n-proximas').textContent = estado.consultas.filter((c) => c.quando >= inicioHoje && c.status === 'agendada').length;
-  $('n-mes').textContent = estado.consultas.filter((c) =>
-    c.status !== 'cancelada' && c.quando.getMonth() === m.getMonth() && c.quando.getFullYear() === m.getFullYear()).length;
-}
-
-// Frases carinhosas: muda a cada vez que entra, sem repetir a última
-const FRASES = [
-  'Como está o casal mais fofo do Brasil? 💕',
-  'Que alegria ver vocês por aqui! 😊',
-  'Vocês são o orgulho da família! ❤️',
-  'O casal mais lindo de São Paulo chegou! 🌹',
-  'Hoje é um ótimo dia para sorrir juntos! 😄',
-  'Juntos, vocês deixam tudo mais bonito! 💐',
-  'Que Deus abençoe o dia de vocês! 🙏',
-  'Saúde e muito amor para o casal mais querido! 💖',
-  'Vocês são exemplo de amor e parceria! 👫',
-  'Bem-vindos! A família ama muito vocês! 🥰',
-  'Que o dia de vocês seja leve e cheio de paz! 🌤️',
-  'Cuidar da saúde é cuidar de quem a gente ama! 💙',
-  'Mais um dia ao lado do casal mais fofo do mundo! 🌎',
-  'Vocês merecem todo o carinho do mundo! 🤗',
-  'Um café, um sorriso e o casal mais querido! ☕',
-  'Que bom ter vocês com a gente! 🌻',
-];
-function escolherFrase() {
-  let ultima = -1;
-  try { ultima = Number(localStorage.getItem('agenda-ultima-frase') ?? -1); } catch (e) {}
-  // na primeira vez, sempre a frase do casal mais fofo do Brasil
-  let i = ultima < 0 ? 0 : Math.floor(Math.random() * FRASES.length);
-  if (FRASES.length > 1 && i === ultima) i = (i + 1) % FRASES.length;
-  try { localStorage.setItem('agenda-ultima-frase', String(i)); } catch (e) {}
-  return FRASES[i];
-}
-
-function renderBoasVindas() {
-  const agora = new Date();
-  const h = agora.getHours();
-  const saudacao = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-  $('bv-saudacao').textContent = 'Olá, Sr. Roberto e Antonia! ' + saudacao + '!';
-  if (!estado.frase) estado.frase = escolherFrase();
-  $('bv-frase').textContent = estado.frase;
-
-  const futuras = estado.consultas.filter((c) => c.status === 'agendada' && c.quando >= agora);
-  if (!futuras.length) {
-    $('bv-texto').textContent = 'Você não tem consultas marcadas.';
-    return;
-  }
-  const c = futuras[0];
-  const d = c.quando;
-  const nome = c.especialidade + (c.medico ? ' — ' + c.medico : '');
-  const q = quando(d);
-  let texto;
-  if (q === 'Hoje') texto = 'Hoje você tem consulta às ' + hora(d) + ': ' + nome + '.';
-  else if (q === 'Amanhã') texto = 'Sua próxima consulta é amanhã, às ' + hora(d) + ': ' + nome + '.';
-  else texto = 'Sua próxima consulta é ' + DIAS_SEMANA[d.getDay()] + ', dia ' + d.getDate() + ' de ' + MESES[d.getMonth()] + ', às ' + hora(d) + ': ' + nome + '.';
-
-  const em7 = new Date(agora.getTime() + 7 * 86400000);
-  const semana = futuras.filter((x) => x.quando <= em7).length;
-  if (semana > 1) texto += ' Nos próximos 7 dias são ' + semana + ' consultas.';
-  $('bv-texto').textContent = texto;
-}
-
-// ---------- alerta na tela (pisca + som) quando a consulta está perto ----------
-const ALERTA_ANTES_MIN = 120;   // começa a avisar 2 horas antes
-const ALERTA_DEPOIS_MIN = 30;   // continua até 30 min depois do horário
-const SOM_A_CADA_MS = 2 * 60000; // repete o som a cada 2 minutos
-let audioCtx = null, ultimoSom = 0, alertaAtual = null, tituloPiscando = null;
-const TITULO_ORIGINAL = document.title;
-
-// O navegador só libera som depois de um clique ou toque na página
-function liberarSom() {
-  try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    Promise.resolve(audioCtx.state === 'suspended' ? audioCtx.resume() : null)
-      .then(() => { if (alertaAtual) verificarAlertas(); });
-  } catch (e) {}
-}
-['click', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, liberarSom, { passive: true }));
-
-function tocarAlarme() {
-  if (!audioCtx || audioCtx.state !== 'running') return;
-  const t0 = audioCtx.currentTime;
-  for (let i = 0; i < 3; i++) {
-    for (const [freq, ini] of [[880, 0], [660, 0.22]]) {
-      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-      o.type = 'sine'; o.frequency.value = freq;
-      const t = t0 + i * 0.7 + ini;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
-      o.connect(g).connect(audioCtx.destination);
-      o.start(t); o.stop(t + 0.22);
-    }
-  }
-}
-
-function chaveAlerta(c) { return 'agenda-alerta-ok:' + c.id + ':' + c.data_hora; }
-function jaConfirmado(c) { try { return localStorage.getItem(chaveAlerta(c)) === '1'; } catch (e) { return false; } }
-
-function textoFalta(min) {
-  if (min <= 1) return 'ESTÁ NA HORA DA CONSULTA!';
-  const h = Math.floor(min / 60), m = Math.round(min % 60);
-  return 'FALTAM ' + (h ? h + (h === 1 ? ' HORA' : ' HORAS') + (m ? ' E ' : '') : '') + (m ? m + ' MINUTOS' : '') + ' PARA A CONSULTA';
-}
-
-function verificarAlertas() {
-  const agora = new Date();
-  const c = estado.consultas.find((x) => {
-    if (x.status !== 'agendada' || jaConfirmado(x)) return false;
-    const min = (x.quando - agora) / 60000;
-    return min <= ALERTA_ANTES_MIN && min >= -ALERTA_DEPOIS_MIN;
-  });
-  alertaAtual = c || null;
-  if (!c) {
-    $('alerta').classList.add('hidden');
-    if (tituloPiscando) { clearInterval(tituloPiscando); tituloPiscando = null; document.title = TITULO_ORIGINAL; }
-    return;
-  }
-  const min = (c.quando - agora) / 60000;
-  $('alerta-titulo').textContent = '⏰ ' + textoFalta(Math.max(0, min));
-  $('alerta-texto').textContent = 'ÀS ' + hora(c.quando) + ' — ' + c.especialidade + (c.medico ? ' — ' + c.medico : '') + (c.local ? ' · ' + c.local : '');
-  $('alerta').classList.remove('hidden');
-  if (!tituloPiscando) {
-    let alterna = false;
-    tituloPiscando = setInterval(() => { alterna = !alterna; document.title = alterna ? '⏰ CONSULTA!' : TITULO_ORIGINAL; }, 1000);
-  }
-  if (Date.now() - ultimoSom >= SOM_A_CADA_MS) { tocarAlarme(); if (audioCtx && audioCtx.state === 'running') ultimoSom = Date.now(); }
-}
-
-$('alerta-ok').addEventListener('click', () => {
-  if (alertaAtual) { try { localStorage.setItem(chaveAlerta(alertaAtual), '1'); } catch (e) {} }
-  ultimoSom = 0;
-  verificarAlertas();
-});
-setInterval(() => { if (estado.consultas.length) { verificarAlertas(); renderBoasVindas(); } }, 30000);
-
-function render() {
-  renderBoasVindas();
-  verificarAlertas();
-  renderCalendario();
-  renderLista();
-  renderResumo();
-}
-
-// ---------- formulário ----------
-$('lista-esp').innerHTML = ESPECIALIDADES.map((e) => '<option value="' + e.toUpperCase() + '"></option>').join('');
-
-function abrirForm(consulta) {
-  estado.editando = consulta || null;
-  mostrarErro($('dlg-msg'), '');
-  $('dlg-titulo').textContent = consulta ? 'Editar consulta' : 'Nova consulta';
-  $('btn-excluir').classList.toggle('hidden', !consulta);
-
-  if (consulta) {
-    const d = consulta.quando;
-    $('f-data').value = chaveDia(d);
-    $('f-hora').value = hora(d);
-    $('f-esp').value = consulta.especialidade || '';
-    $('f-medico').value = consulta.medico || '';
-    $('f-local').value = consulta.local || '';
-    $('f-tel').value = consulta.telefone || '';
-    $('f-status').value = consulta.status;
-    $('f-obs').value = consulta.observacoes || '';
-  } else {
-    $('form-consulta').reset();
-    $('f-data').value = estado.diaSel || chaveDia(new Date());
-    $('f-hora').value = '09:00';
-    $('f-status').value = 'agendada';
-  }
-  $('dlg').showModal();
-  $('f-esp').focus();
-}
-
-$('btn-nova').addEventListener('click', () => abrirForm(null));
-$('btn-cancelar').addEventListener('click', () => $('dlg').close());
-
-$('form-consulta').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const [a, m, d] = $('f-data').value.split('-').map(Number);
-  const [h, min] = $('f-hora').value.split(':').map(Number);
-  const dataHora = new Date(a, m - 1, d, h, min);
-
-  const dados = {
-    data_hora: dataHora.toISOString(),
-    especialidade: $('f-esp').value.trim().toUpperCase(),
-    medico: $('f-medico').value.trim().toUpperCase() || null,
-    local: $('f-local').value.trim().toUpperCase() || null,
-    telefone: $('f-tel').value.trim().toUpperCase() || null,
-    status: $('f-status').value,
-    observacoes: $('f-obs').value.trim().toUpperCase() || null,
-  };
-
-  $('btn-salvar').disabled = true;
-  const resp = estado.editando
-    ? await sb.from('consultas').update(dados).eq('id', estado.editando.id)
-    : await sb.from('consultas').insert(dados);
-  $('btn-salvar').disabled = false;
-
-  if (resp.error) {
-    mostrarErro($('dlg-msg'), 'Não foi possível salvar: ' + resp.error.message);
-    return;
-  }
-  $('dlg').close();
-  estado.mesVisto = inicioMes(dataHora);
-  await carregar();
-});
-
-$('btn-excluir').addEventListener('click', () => {
-  if (!estado.editando) return;
-  const c = estado.editando;
-  $('dlg').close();
-  excluirConsulta(c);
-});
-
-// Confirmação grande antes de excluir
-let consultaParaExcluir = null;
-function excluirConsulta(c) {
-  if (!c) return;
-  consultaParaExcluir = c;
-  const d = c.quando;
-  $('exc-texto').textContent = c.especialidade + (c.medico ? ' — ' + c.medico : '') +
-    ' · ' + DIAS_SEMANA[d.getDay()] + ', ' + d.getDate() + ' de ' + MESES[d.getMonth()] + ' às ' + hora(d);
-  mostrarErro($('exc-msg'), '');
-  $('dlg-excluir').showModal();
-  $('exc-nao').focus();
-}
-$('exc-nao').addEventListener('click', () => $('dlg-excluir').close());
-$('exc-sim').addEventListener('click', async () => {
-  if (!consultaParaExcluir) return;
-  $('exc-sim').disabled = true;
-  const { error } = await sb.from('consultas').delete().eq('id', consultaParaExcluir.id);
-  $('exc-sim').disabled = false;
-  if (error) {
-    mostrarErro($('exc-msg'), 'Não foi possível excluir: ' + error.message);
-    return;
-  }
-  consultaParaExcluir = null;
-  $('dlg-excluir').close();
-  await carregar();
-});
-
-// Tudo que for digitado vira MAIÚSCULA na hora
-document.querySelectorAll('#form-consulta input[type="text"], #form-consulta input[type="tel"], #form-consulta textarea, #busca').forEach((el) => {
-  el.addEventListener('input', () => {
-    const u = el.value.toUpperCase();
-    if (u === el.value) return;
-    const a = el.selectionStart, b = el.selectionEnd;
-    el.value = u;
-    try { el.setSelectionRange(a, b); } catch (e) {}
-  });
-});
-
-$('btn-imprimir').addEventListener('click', () => window.print());
-
-// ---------- tamanho da letra (A− / A+), lembrado neste computador ----------
-const ZOOMS = [1, 1.2, 1.4, 1.6, 1.8, 2, 2.3, 2.6];
-// no computador começa em 180%; no celular (tela estreita) começa no tamanho normal, que já é grande
-let zoomNivel = window.innerWidth < 700 ? 0 : 4;
-try { const v = localStorage.getItem('agenda-zoom-v3'); const z = v === null ? NaN : Number(v); if (z >= 0 && z < ZOOMS.length) zoomNivel = z; } catch (e) {}
-function aplicarZoom() {
-  document.body.style.zoom = ZOOMS[zoomNivel];
-  document.documentElement.style.setProperty('--z', String(ZOOMS[zoomNivel]));
-  $('zoom-menos').disabled = zoomNivel === 0;
-  $('zoom-mais').disabled = zoomNivel === ZOOMS.length - 1;
-  try { localStorage.setItem('agenda-zoom-v3', String(zoomNivel)); } catch (e) {}
-}
-$('zoom-menos').addEventListener('click', () => { if (zoomNivel > 0) { zoomNivel--; aplicarZoom(); } });
-$('zoom-mais').addEventListener('click', () => { if (zoomNivel < ZOOMS.length - 1) { zoomNivel++; aplicarZoom(); } });
-aplicarZoom();
+$('delete-from-form').onclick=()=>{const item=state.editing;$('appointment-dialog').close();requestDelete(item)};
+$('keep-btn').onclick=()=>$('confirm-dialog').close();
+$('confirm-delete').onclick=async()=>{if(!state.deleting)return;$('confirm-delete').disabled=true;const {error}=await sb.from('consultas').delete().eq('id',state.deleting.id);$('confirm-delete').disabled=false;if(error){alert('NÃO FOI POSSÍVEL EXCLUIR: '+error.message);return}state.deleting=null;$('confirm-dialog').close();await load()};
+$('appointment-list').addEventListener('click',e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]'),speak=e.target.closest('[data-speak]');if(edit)openForm(state.items.find(x=>String(x.id)===edit.dataset.edit));if(del)requestDelete(state.items.find(x=>String(x.id)===del.dataset.delete));if(speak){const c=state.items.find(x=>String(x.id)===speak.dataset.speak);if(c)say(`Consulta de ${c.especialidade}, ${fmtDate(c.when)}, às ${dateTime(c.when)}.${c.medico?', médico '+c.medico:''}${c.local?', local '+c.local:''}${c.observacoes?', observações: '+c.observacoes:''}`)}});
+document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;renderList()});
+$('search').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderList()});
+$('show-upcoming').onclick=()=>{$('list-panel').scrollIntoView({behavior:'smooth'});state.filter='upcoming';renderList()};
+$('show-history').onclick=()=>{$('list-panel').scrollIntoView({behavior:'smooth'});state.filter='past';renderList()};
+$('listen-home').onclick=()=>{const txt=$('greeting').textContent+'. '+$('today-label').textContent+'. '+$('next-content').innerText;say(txt)};
+$('font-down').onclick=()=>{state.font=Math.max(1,state.font-.1);setupFont()};
+$('font-up').onclick=()=>{state.font=Math.min(1.8,state.font+.1);setupFont()};
+$('easy-toggle').onclick=()=>setEasy(!state.easy);
+$('sound-toggle').onclick=enableSound;
+$('print-btn').onclick=()=>window.print();
+setEasy(true);setupFont();
+const {data:{session}}=await sb.auth.getSession();
+$('login-screen').classList.toggle('hidden',!!session);$('app').classList.toggle('hidden',!session);if(session)await load();
+setInterval(()=>{if(!$('app').classList.contains('hidden'))renderHome()},30000);
 </script>
 </body>
 </html>
