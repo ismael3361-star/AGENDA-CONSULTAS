@@ -77,6 +77,13 @@ header .btn{min-height:50px;padding:8px 16px;border-radius:14px;font-size:calc(1
 .next-card .next-time{font-size:calc(46px * var(--font-scale));font-weight:700;color:#fff;line-height:1.1;margin-top:2px;font-variant-numeric:tabular-nums}
 .next-card p{position:relative;z-index:1;margin:4px 0;font-weight:700;color:#E7EDF8}
 .next-card .next-what{font-size:calc(25px * var(--font-scale));color:#fff;padding-top:14px;border-top:1px solid rgba(255,255,255,.18)}
+.tempo-hoje{display:inline-flex;align-items:center;gap:14px;margin-top:12px;background:#EEF4FF;border:1px solid #D3E0FB;border-radius:18px;padding:10px 18px;color:var(--navy);font-size:calc(19px * var(--font-scale))}
+.tempo-hoje strong{font-size:calc(22px * var(--font-scale))}
+.tempo-ic{font-size:calc(40px * var(--font-scale));line-height:1}
+.tempo-proxima{position:relative;z-index:1;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:12px 16px;margin:0 0 14px;color:#fff;font-weight:700}
+.tempo-proxima .tempo-tit{font-size:calc(20px * var(--font-scale))}
+.tempo-dica{display:inline-block;margin-top:6px;background:#FFD54A;color:#1B1F24;border-radius:10px;padding:3px 10px}
+.tempo-linha{color:var(--blue-dark)!important;font-weight:700!important}
 .next-card .next-obs{display:inline-block;margin-top:8px;background:rgba(255,213,74,.16);color:#FFE7A0;padding:6px 12px;border-radius:12px}
 .next-card .btn{position:relative;z-index:1;margin-top:16px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
 .next-card .btn:hover{background:rgba(255,255,255,.2)}
@@ -196,7 +203,7 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
 </header>
 <main>
   <section class="panel">
-    <div class="topline"><div><h2 id="greeting">BOM DIA!</h2><p id="frase" style="margin:0 0 6px;font-weight:900;color:#7A2E8E;font-size:calc(23px * var(--font-scale))"></p><p id="today-label" class="help"></p></div><button class="btn btn-small no-print" id="listen-home">🔊 OUVIR RESUMO</button></div>
+    <div class="topline"><div><h2 id="greeting">BOM DIA!</h2><p id="frase" style="margin:0 0 6px;font-weight:900;color:#7A2E8E;font-size:calc(23px * var(--font-scale))"></p><p id="today-label" class="help"></p><div id="tempo-hoje" class="tempo-hoje hidden" aria-live="polite"></div></div><button class="btn btn-small no-print" id="listen-home">🔊 OUVIR RESUMO</button></div>
     <div id="alert-box" class="notice notice-red hidden" role="alert" aria-live="assertive"></div>
     <div class="next-card" id="next-card">
       <h2>PRÓXIMA CONSULTA</h2><div id="next-content">Carregando consultas...</div>
@@ -288,6 +295,7 @@ function renderHome(){
  const now=new Date(),today=new Date();today.setHours(0,0,0,0);
  $('greeting').textContent=currentGreeting()+', SR. ROBERTO E ANTONIA!';
  if(!state.frase)state.frase=escolherFrase();$('frase').textContent=state.frase;
+ renderTempoHoje();
  $('today-label').textContent=fmtDate(now);
  const upcoming=state.items.filter(x=>x.status==='agendada'&&x.when>=now).sort((a,b)=>a.when-b.when);
  const next=upcoming[0];
@@ -295,7 +303,7 @@ function renderHome(){
  $('count-month').textContent=state.items.filter(x=>x.status!=='cancelada'&&x.when.getMonth()===now.getMonth()&&x.when.getFullYear()===now.getFullYear()).length;
  $('count-today').textContent=state.items.filter(x=>x.status==='agendada'&&dateKey(x.when)===dateKey(now)).length;
  if(!next){$('next-content').innerHTML='<p>NÃO HÁ CONSULTAS FUTURAS CADASTRADAS.</p>';$('listen-next').disabled=true}
- else{$('listen-next').disabled=false;$('next-content').innerHTML=`<div class="next-when"><div class="next-day"><strong>${pad(next.when.getDate())}</strong><span>${next.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div class="next-info"><span class="next-rel">${quandoRel(next.when)}</span><div class="next-weekday">${next.when.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()}, ${next.when.getDate()} DE ${next.when.toLocaleDateString('pt-BR',{month:'long'}).toUpperCase()}</div><div class="next-time">ÀS ${dateTime(next.when)}</div></div></div><p class="next-what">${escapeHtml(next.especialidade)}${next.medico?' — '+escapeHtml(next.medico):''}</p>${next.local?`<p>📍 ${escapeHtml(next.local)}</p>`:''}${next.observacoes?`<p class="next-obs">${escapeHtml(next.observacoes)}</p>`:''}`; $('listen-next').onclick=()=>say(`Sua próxima consulta é ${fmtDate(next.when)}, às ${dateTime(next.when)}, ${next.especialidade}${next.medico?', com '+next.medico:''}${next.local?', no endereço '+next.local:''}.`)}
+ else{$('listen-next').disabled=false;$('next-content').innerHTML=`<div class="next-when"><div class="next-day"><strong>${pad(next.when.getDate())}</strong><span>${next.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div class="next-info"><span class="next-rel">${quandoRel(next.when)}</span><div class="next-weekday">${next.when.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()}, ${next.when.getDate()} DE ${next.when.toLocaleDateString('pt-BR',{month:'long'}).toUpperCase()}</div><div class="next-time">ÀS ${dateTime(next.when)}</div></div></div>${tempoProxima(next.when)}<p class="next-what">${escapeHtml(next.especialidade)}${next.medico?' — '+escapeHtml(next.medico):''}</p>${next.local?`<p>📍 ${escapeHtml(next.local)}</p>`:''}${next.observacoes?`<p class="next-obs">${escapeHtml(next.observacoes)}</p>`:''}`; $('listen-next').onclick=()=>say(`Sua próxima consulta é ${fmtDate(next.when)}, às ${dateTime(next.when)}, ${next.especialidade}${next.medico?', com '+next.medico:''}${next.local?', no endereço '+next.local:''}.`)}
  const alertItem=upcoming.find(x=>(x.when-now)/60000<=120);
  if(alertItem){$('alert-box').classList.remove('hidden');$('alert-box').textContent=`ATENÇÃO! VOCÊ TEM UMA CONSULTA ${alertItem.when.toDateString()===now.toDateString()?'HOJE':'EM BREVE'}, ÀS ${dateTime(alertItem.when)}: ${alertItem.especialidade}.`;$('alert-box').onclick=()=>say($('alert-box').textContent);const alertId=String(alertItem.id);if(state.soundEnabled&&!state.soundPlayed.has(alertId)){state.soundPlayed.add(alertId);playAlertSound()}}
  else $('alert-box').classList.add('hidden');
@@ -306,10 +314,52 @@ function renderList(){
  if(!items.length){$('appointment-list').innerHTML='<div class="empty">NENHUMA CONSULTA ENCONTRADA.</div>';return}
  $('appointment-list').innerHTML=items.map(c=>{
  const status=c.status||'agendada';const label={agendada:'AGENDADA',realizada:'REALIZADA',cancelada:'CANCELADA'}[status]||status.toUpperCase();
- return `<article class="appointment"><div class="datebox"><strong>${pad(c.when.getDate())}</strong><span>${c.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div><div class="appointment-title">${escapeHtml(c.especialidade)}${c.medico?' — '+escapeHtml(c.medico):''}</div><div class="detail">${escapeHtml(fmtDate(c.when))} • ÀS ${dateTime(c.when)}</div>${c.local?`<div class="detail">LOCAL: ${escapeHtml(c.local)}</div>`:''}${c.telefone?`<div class="detail">TELEFONE: ${escapeHtml(c.telefone)}</div>`:''}${c.observacoes?`<div class="detail">OBSERVAÇÕES: ${escapeHtml(c.observacoes)}</div>`:''}<div class="tags"><span class="tag tag-${status}">${label}</span></div><div class="item-actions no-print"><button class="btn btn-small" data-edit="${escapeHtml(c.id)}">EDITAR</button><button class="btn btn-small btn-red" data-delete="${escapeHtml(c.id)}">EXCLUIR</button><button class="btn btn-small" data-speak="${escapeHtml(c.id)}">🔊 OUVIR</button></div></div></article>`
+ return `<article class="appointment"><div class="datebox"><strong>${pad(c.when.getDate())}</strong><span>${c.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div><div class="appointment-title">${escapeHtml(c.especialidade)}${c.medico?' — '+escapeHtml(c.medico):''}</div><div class="detail">${escapeHtml(fmtDate(c.when))} • ÀS ${dateTime(c.when)}</div>${c.local?`<div class="detail">LOCAL: ${escapeHtml(c.local)}</div>`:''}${c.telefone?`<div class="detail">TELEFONE: ${escapeHtml(c.telefone)}</div>`:''}${c.observacoes?`<div class="detail">OBSERVAÇÕES: ${escapeHtml(c.observacoes)}</div>`:''}${status==='agendada'?tempoLinha(c.when):''}<div class="tags"><span class="tag tag-${status}">${label}</span></div><div class="item-actions no-print"><button class="btn btn-small" data-edit="${escapeHtml(c.id)}">EDITAR</button><button class="btn btn-small btn-red" data-delete="${escapeHtml(c.id)}">EXCLUIR</button><button class="btn btn-small" data-speak="${escapeHtml(c.id)}">🔊 OUVIR</button></div></div></article>`
  }).join('');
 }
 function render(){renderHome();renderList()}
+
+// ---------- Previsão do tempo (Open-Meteo, grátis, sem cadastro) ----------
+const CIDADE={nome:'SÃO PAULO',lat:-23.55,lon:-46.63};
+const TEMPO_COD={0:['☀️','CÉU LIMPO'],1:['🌤️','POUCAS NUVENS'],2:['⛅','PARCIALMENTE NUBLADO'],3:['☁️','NUBLADO'],45:['🌫️','NEBLINA'],48:['🌫️','NEBLINA'],51:['🌦️','GAROA FRACA'],53:['🌦️','GAROA'],55:['🌧️','GAROA FORTE'],56:['🌧️','GAROA GELADA'],57:['🌧️','GAROA GELADA'],61:['🌧️','CHUVA FRACA'],63:['🌧️','CHUVA'],65:['🌧️','CHUVA FORTE'],66:['🌧️','CHUVA GELADA'],67:['🌧️','CHUVA GELADA'],71:['🌨️','NEVE'],73:['🌨️','NEVE'],75:['🌨️','NEVE'],77:['🌨️','NEVE'],80:['🌦️','PANCADAS DE CHUVA'],81:['🌧️','PANCADAS DE CHUVA'],82:['⛈️','PANCADAS FORTES'],85:['🌨️','NEVE'],86:['🌨️','NEVE'],95:['⛈️','TEMPESTADE'],96:['⛈️','TEMPESTADE COM GRANIZO'],99:['⛈️','TEMPESTADE COM GRANIZO']};
+function tempoDesc(c){return TEMPO_COD[c]||['🌡️','']}
+state.tempo=null;
+async function carregarTempo(){
+ try{
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+CIDADE.lat+'&longitude='+CIDADE.lon+'&timezone=America%2FSao_Paulo&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=16';
+  const r=await fetch(url);if(!r.ok)throw new Error(r.status);const j=await r.json();
+  const dias={};(j.daily.time||[]).forEach((d,i)=>{dias[d]={cod:j.daily.weather_code[i],max:Math.round(j.daily.temperature_2m_max[i]),min:Math.round(j.daily.temperature_2m_min[i]),chuva:j.daily.precipitation_probability_max[i]}});
+  state.tempo={dias,agora:j.current?{temp:Math.round(j.current.temperature_2m),cod:j.current.weather_code}:null};
+ }catch(e){console.warn('Previsão do tempo indisponível',e);state.tempo=null}
+ if(!$('app').classList.contains('hidden'))render();
+}
+function dicaTempo(d){
+ if(!d)return'';
+ const chuvoso=[51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(d.cod)||(d.chuva??0)>=50;
+ if(chuvoso)return'☂️ LEVE GUARDA-CHUVA';
+ if(d.max>=30)return'💧 DIA QUENTE: LEVE ÁGUA';
+ if(d.min<=14)return'🧥 DIA FRIO: LEVE UM AGASALHO';
+ return'';
+}
+function tempoDoDia(when){if(!state.tempo)return null;return state.tempo.dias[dateKey(when)]||null}
+function tempoProxima(when){
+ const d=tempoDoDia(when);if(!d)return'';
+ const [ic,txt]=tempoDesc(d.cod);const dica=dicaTempo(d);
+ return `<div class="tempo-proxima"><span class="tempo-ic" aria-hidden="true">${ic}</span><div><div class="tempo-tit">PREVISÃO PARA O DIA: ${txt}</div><div>${d.max}° / ${d.min}°${d.chuva!=null?' · CHANCE DE CHUVA '+d.chuva+'%':''}</div>${dica?`<div class="tempo-dica">${dica}</div>`:''}</div></div>`;
+}
+function tempoLinha(when){
+ const d=tempoDoDia(when);if(!d)return'';
+ const [ic,txt]=tempoDesc(d.cod);const dica=dicaTempo(d);
+ return `<div class="detail tempo-linha">${ic} PREVISÃO: ${txt}, ${d.max}°/${d.min}°${dica?' — '+dica:''}</div>`;
+}
+function renderTempoHoje(){
+ const box=$('tempo-hoje');if(!state.tempo){box.classList.add('hidden');return}
+ const hoje=state.tempo.dias[dateKey(new Date())];const ag=state.tempo.agora;
+ if(!hoje&&!ag){box.classList.add('hidden');return}
+ const [ic,txt]=tempoDesc(ag?ag.cod:hoje.cod);
+ box.innerHTML=`<span class="tempo-ic" aria-hidden="true">${ic}</span><div><strong>${ag?ag.temp+'° AGORA':''}${ag&&txt?' · ':''}${txt}</strong><div>${CIDADE.nome}${hoje?' · MÁX '+hoje.max+'° · MÍN '+hoje.min+'°'+(hoje.chuva!=null?' · CHUVA '+hoje.chuva+'%':''):''}</div></div>`;
+ box.classList.remove('hidden');
+}
 async function load(){
  const {data,error}=await sb.from('consultas').select('*').order('data_hora',{ascending:true});
  if(error){showError($('app-error'),'ERRO AO CARREGAR CONSULTAS: '+error.message);return}
@@ -355,6 +405,7 @@ setEasy(true);setupFont();
 const {data:{session}}=await sb.auth.getSession();
 $('login-screen').classList.toggle('hidden',!!session);$('app').classList.toggle('hidden',!session);if(session)await load();
 setInterval(()=>{if(!$('app').classList.contains('hidden'))renderHome()},30000);
+carregarTempo();setInterval(carregarTempo,30*60000);
 </script>
 </body>
 </html>
