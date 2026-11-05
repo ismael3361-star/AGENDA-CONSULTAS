@@ -67,9 +67,17 @@ header .btn{min-height:50px;padding:8px 16px;border-radius:14px;font-size:calc(1
 .next-card{position:relative;overflow:hidden;background:var(--navy);color:#fff;border-radius:22px;padding:28px 30px;box-shadow:var(--shadow-lg)}
 .next-card::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.06)}
 .next-card h2{font-size:calc(19px * var(--font-scale));letter-spacing:.12em;color:#B8C7E6;margin:0 0 6px}
-.next-card .next-time{font-size:calc(64px * var(--font-scale));font-weight:700;color:#fff;line-height:1.05;margin:4px 0 10px;font-variant-numeric:tabular-nums}
-.next-card p{margin:4px 0;font-weight:700;color:#E7EDF8}
-.next-card p:first-of-type{font-size:calc(25px * var(--font-scale));color:#fff}
+.next-when{position:relative;z-index:1;display:flex;align-items:center;gap:22px;margin:10px 0 16px}
+.next-day{flex:none;width:128px;background:#fff;color:var(--navy);border-radius:22px;text-align:center;padding:12px 6px 10px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.next-day strong{display:block;font-size:calc(66px * var(--font-scale));line-height:1;font-variant-numeric:tabular-nums}
+.next-day span{display:block;font-size:calc(24px * var(--font-scale));font-weight:700;letter-spacing:.1em;color:var(--blue)}
+.next-info{min-width:0}
+.next-rel:not(:empty){display:inline-block;background:#FFD54A;color:#1B1F24;font-weight:700;letter-spacing:.06em;font-size:calc(19px * var(--font-scale));padding:4px 14px;border-radius:99px;margin-bottom:6px}
+.next-weekday{font-size:calc(28px * var(--font-scale));font-weight:700;line-height:1.2;color:#fff}
+.next-card .next-time{font-size:calc(46px * var(--font-scale));font-weight:700;color:#fff;line-height:1.1;margin-top:2px;font-variant-numeric:tabular-nums}
+.next-card p{position:relative;z-index:1;margin:4px 0;font-weight:700;color:#E7EDF8}
+.next-card .next-what{font-size:calc(25px * var(--font-scale));color:#fff;padding-top:14px;border-top:1px solid rgba(255,255,255,.18)}
+.next-card .next-obs{display:inline-block;margin-top:8px;background:rgba(255,213,74,.16);color:#FFE7A0;padding:6px 12px;border-radius:12px}
 .next-card .btn{position:relative;z-index:1;margin-top:16px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
 .next-card .btn:hover{background:rgba(255,255,255,.2)}
 
@@ -146,7 +154,7 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
   main{padding:14px 12px 30px;gap:16px}
   .panel{padding:20px;border-radius:22px}
   .home-grid,.action-grid{grid-template-columns:1fr}
-  .next-card{padding:22px}.next-card .next-time{font-size:calc(52px * var(--font-scale))}
+  .next-card{padding:22px}.next-when{gap:14px}.next-day{width:96px;border-radius:18px}.next-day strong{font-size:calc(50px * var(--font-scale))}.next-day span{font-size:calc(19px * var(--font-scale))}.next-weekday{font-size:calc(21px * var(--font-scale))}.next-card .next-time{font-size:calc(36px * var(--font-scale))}
   #greeting{font-size:calc(28px * var(--font-scale))}
   .appointment{grid-template-columns:76px 1fr;gap:14px;padding:16px}
   .datebox strong{font-size:32px}
@@ -158,7 +166,7 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
   .home-grid{grid-template-columns:1fr}.metric{display:flex;align-items:center;gap:14px}.metric strong{font-size:calc(34px * var(--font-scale))}.metric span{font-size:calc(17px * var(--font-scale))}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-@media print{header,.no-print,.item-actions,footer{display:none!important}body{background:#fff}main{padding:0}.panel,.appointment{box-shadow:none}.next-card{background:#fff;color:#000;border:2px solid #000}.next-card *{color:#000!important}.appointment{break-inside:avoid}}
+@media print{header,.no-print,.item-actions,footer{display:none!important}body{background:#fff}main{padding:0}.panel,.appointment{box-shadow:none}.next-card{background:#fff;color:#000;border:2px solid #000}.next-card *{color:#000!important}.next-day{box-shadow:none;border:2px solid #000}.appointment{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -262,6 +270,7 @@ async function enableSound(){try{const AudioCtx=window.AudioContext||window.webk
 function fmtDate(d){return d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}
 const FRASES=['COMO ESTÁ O CASAL MAIS FOFO DO BRASIL? 💕','QUE ALEGRIA VER VOCÊS POR AQUI! 😊','VOCÊS SÃO O ORGULHO DA FAMÍLIA! ❤️','O CASAL MAIS LINDO DE SÃO PAULO CHEGOU! 🌹','HOJE É UM ÓTIMO DIA PARA SORRIR JUNTOS! 😄','JUNTOS, VOCÊS DEIXAM TUDO MAIS BONITO! 💐','QUE DEUS ABENÇOE O DIA DE VOCÊS! 🙏','SAÚDE E MUITO AMOR PARA O CASAL MAIS QUERIDO! 💖','VOCÊS SÃO EXEMPLO DE AMOR E PARCERIA! 👫','BEM-VINDOS! A FAMÍLIA AMA MUITO VOCÊS! 🥰','QUE O DIA DE VOCÊS SEJA LEVE E CHEIO DE PAZ! 🌤️','CUIDAR DA SAÚDE É CUIDAR DE QUEM A GENTE AMA! 💙','MAIS UM DIA AO LADO DO CASAL MAIS FOFO DO MUNDO! 🌎','VOCÊS MERECEM TODO O CARINHO DO MUNDO! 🤗','UM CAFÉ, UM SORRISO E O CASAL MAIS QUERIDO! ☕','QUE BOM TER VOCÊS COM A GENTE! 🌻'];
 function escolherFrase(){let ultima=-1;try{const v=localStorage.getItem('agenda-ultima-frase');if(v!==null)ultima=Number(v)}catch(e){}let i=ultima<0?0:Math.floor(Math.random()*FRASES.length);if(FRASES.length>1&&i===ultima)i=(i+1)%FRASES.length;try{localStorage.setItem('agenda-ultima-frase',String(i))}catch(e){}return FRASES[i]}
+function quandoRel(d){const h=new Date();h.setHours(0,0,0,0);const x=new Date(d);x.setHours(0,0,0,0);const n=Math.round((x-h)/86400000);return n===0?'HOJE':n===1?'AMANHÃ':n>1?'DAQUI A '+n+' DIAS':''}
 function currentGreeting(){const h=new Date().getHours();return h<12?'BOM DIA':h<18?'BOA TARDE':'BOA NOITE'}
 function setupFont(){document.documentElement.style.setProperty('--font-scale',state.font);$('font-down').disabled=state.font<=1;$('font-up').disabled=state.font>=1.8}
 function setEasy(on){state.easy=on;document.body.classList.toggle('easy-mode',on);$('easy-toggle').textContent='MODO FÁCIL: '+(on?'ATIVO':'DESATIVADO');$('easy-toggle').setAttribute('aria-pressed',String(on))}
@@ -286,7 +295,7 @@ function renderHome(){
  $('count-month').textContent=state.items.filter(x=>x.status!=='cancelada'&&x.when.getMonth()===now.getMonth()&&x.when.getFullYear()===now.getFullYear()).length;
  $('count-today').textContent=state.items.filter(x=>x.status==='agendada'&&dateKey(x.when)===dateKey(now)).length;
  if(!next){$('next-content').innerHTML='<p>NÃO HÁ CONSULTAS FUTURAS CADASTRADAS.</p>';$('listen-next').disabled=true}
- else{$('listen-next').disabled=false;$('next-content').innerHTML=`<div class="next-time">${dateTime(next.when)}</div><p>${escapeHtml(next.especialidade)}${next.medico?' — '+escapeHtml(next.medico):''}</p><p>${escapeHtml(fmtDate(next.when))}</p>${next.local?`<p>${escapeHtml(next.local)}</p>`:''}`; $('listen-next').onclick=()=>say(`Sua próxima consulta é ${fmtDate(next.when)}, às ${dateTime(next.when)}, ${next.especialidade}${next.medico?', com '+next.medico:''}${next.local?', no endereço '+next.local:''}.`)}
+ else{$('listen-next').disabled=false;$('next-content').innerHTML=`<div class="next-when"><div class="next-day"><strong>${pad(next.when.getDate())}</strong><span>${next.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div class="next-info"><span class="next-rel">${quandoRel(next.when)}</span><div class="next-weekday">${next.when.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()}, ${next.when.getDate()} DE ${next.when.toLocaleDateString('pt-BR',{month:'long'}).toUpperCase()}</div><div class="next-time">ÀS ${dateTime(next.when)}</div></div></div><p class="next-what">${escapeHtml(next.especialidade)}${next.medico?' — '+escapeHtml(next.medico):''}</p>${next.local?`<p>📍 ${escapeHtml(next.local)}</p>`:''}${next.observacoes?`<p class="next-obs">${escapeHtml(next.observacoes)}</p>`:''}`; $('listen-next').onclick=()=>say(`Sua próxima consulta é ${fmtDate(next.when)}, às ${dateTime(next.when)}, ${next.especialidade}${next.medico?', com '+next.medico:''}${next.local?', no endereço '+next.local:''}.`)}
  const alertItem=upcoming.find(x=>(x.when-now)/60000<=120);
  if(alertItem){$('alert-box').classList.remove('hidden');$('alert-box').textContent=`ATENÇÃO! VOCÊ TEM UMA CONSULTA ${alertItem.when.toDateString()===now.toDateString()?'HOJE':'EM BREVE'}, ÀS ${dateTime(alertItem.when)}: ${alertItem.especialidade}.`;$('alert-box').onclick=()=>say($('alert-box').textContent);const alertId=String(alertItem.id);if(state.soundEnabled&&!state.soundPlayed.has(alertId)){state.soundPlayed.add(alertId);playAlertSound()}}
  else $('alert-box').classList.add('hidden');
