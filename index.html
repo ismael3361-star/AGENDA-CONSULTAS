@@ -95,7 +95,7 @@ header .btn{min-height:50px;padding:8px 16px;border-radius:14px;font-size:calc(1
 .metric span{font-weight:700;color:var(--muted);font-size:calc(17px * var(--font-scale));letter-spacing:.04em}
 
 /* Ações principais */
-.action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.action-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
 .action-grid button{font-size:calc(21px * var(--font-scale))!important}
 .btn-exame{background:#5B3BB5;border-color:#5B3BB5;color:#fff;box-shadow:0 6px 16px rgba(91,59,181,.28)}
 .btn-exame:hover{background:#472C93;border-color:#472C93}
@@ -109,8 +109,36 @@ header .btn{min-height:50px;padding:8px 16px;border-radius:14px;font-size:calc(1
 .tipo-escolha button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
 .tipo-escolha button[data-tipo=exame][aria-pressed=true]{background:#5B3BB5;border-color:#5B3BB5}
 .notice-jejum{background:#FFF1C2;color:#5C3A00;border:2px solid #F0C64A}
+.btn-glic{background:#9B1C47;border-color:#9B1C47;color:#fff;box-shadow:0 6px 16px rgba(155,28,71,.28)}
+.btn-glic:hover{background:#7A1538;border-color:#7A1538}
+.glic-ultima{display:flex;align-items:center;gap:22px;flex-wrap:wrap;border-radius:20px;padding:18px 22px;background:#FAF8F4;border:1px solid var(--line)}
+.glic-num{font-size:calc(64px * var(--font-scale));font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.glic-num small{font-size:calc(20px * var(--font-scale));font-weight:700;margin-left:6px;color:var(--muted)}
+.glic-info{font-weight:700}
+.glic-info .glic-sit{display:inline-block;border-radius:99px;padding:4px 14px;margin-bottom:6px;letter-spacing:.04em}
+.sit-verde{background:#DDF4E8;color:#0B6B42}.sit-amarelo{background:#FFF1C2;color:#7A4A00}.sit-vermelho{background:#FDE0DC;color:#A61B11}
+.num-verde{color:#0B7A4B}.num-amarelo{color:#9A5B00}.num-vermelho{color:#C0261A}
+.glic-alerta{margin-top:14px;padding:16px 20px;border-radius:16px;background:var(--red);color:#fff;font-weight:700}
+.glic-grafico{background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px;overflow:hidden}
+.glic-grafico svg{display:block;width:100%;height:auto}
+.glic-legenda{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:calc(17px * var(--font-scale));font-weight:700;color:var(--muted)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.dot.verde{background:#0B7A4B}.dot.amarelo{background:#E0A100}.dot.vermelho{background:#C0261A}
+.glic-lista{display:grid;gap:10px}
+.glic-item{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:12px 16px;background:#fff}
+.glic-item .v{font-size:calc(34px * var(--font-scale));font-weight:700;min-width:80px;text-align:center;font-variant-numeric:tabular-nums}
+.glic-item .d{font-weight:700}.glic-item .d span{display:block;font-weight:400;color:var(--muted)}
+.glic-input{font-size:calc(44px * var(--font-scale));font-weight:700;min-height:84px;text-align:center}
+.glic-momentos{border:0;padding:0;margin:0 0 16px}
+.glic-momentos legend{font-weight:700;margin-bottom:8px;letter-spacing:.02em}
+#glic-momentos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#glic-momentos button{min-height:58px}
+#glic-momentos button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.glic-res-num{font-size:calc(72px * var(--font-scale));font-weight:700;line-height:1;text-align:center;margin:10px 0}
+.glic-res-txt{text-align:center;font-size:calc(24px * var(--font-scale));font-weight:700}
+.relatorio{display:none}
 .action-grid button{min-height:96px;font-size:calc(24px * var(--font-scale))}
-.action-grid .btn:not(.btn-primary):not(.btn-green):not(.btn-exame){background:#fff;box-shadow:var(--shadow)}
+.action-grid .btn:not(.btn-primary):not(.btn-green):not(.btn-exame):not(.btn-glic){background:#fff;box-shadow:var(--shadow)}
 
 /* Lista */
 .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
@@ -175,6 +203,8 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
   main{padding:14px 12px 30px;gap:16px}
   .panel{padding:20px;border-radius:22px}
   .home-grid,.action-grid{grid-template-columns:1fr}
+  .glic-item{grid-template-columns:auto 1fr}.glic-item .btn{grid-column:1 / -1}
+  .glic-num{font-size:calc(52px * var(--font-scale))}
   .next-card{padding:22px}.next-when{gap:14px}.next-day{width:96px;border-radius:18px}.next-day strong{font-size:calc(50px * var(--font-scale))}.next-day span{font-size:calc(19px * var(--font-scale))}.next-weekday{font-size:calc(21px * var(--font-scale))}.next-card .next-time{font-size:calc(36px * var(--font-scale))}
   #greeting{font-size:calc(28px * var(--font-scale))}
   .appointment{grid-template-columns:76px minmax(0,1fr);gap:14px;padding:16px}
@@ -187,7 +217,7 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
   .home-grid{grid-template-columns:1fr}.metric{display:flex;align-items:center;gap:14px}.metric strong{font-size:calc(34px * var(--font-scale))}.metric span{font-size:calc(17px * var(--font-scale))}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-@media print{header,.no-print,.item-actions,footer{display:none!important}body{background:#fff}main{padding:0}.panel,.appointment{box-shadow:none}.next-card{background:#fff;color:#000;border:2px solid #000}.next-card *{color:#000!important}.next-day{box-shadow:none;border:2px solid #000}.appointment{break-inside:avoid}}
+@media print{body.print-glicose main>*:not(#relatorio-glicose){display:none!important}body.print-glicose #relatorio-glicose{display:block!important}.relatorio table{width:100%;border-collapse:collapse;font-size:14px}.relatorio th,.relatorio td{border:1px solid #999;padding:4px 6px;text-align:left}.relatorio h2{font-size:22px}.relatorio .resumo{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;margin:8px 0 12px}header,.no-print,.item-actions,footer{display:none!important}body{background:#fff}main{padding:0}.panel,.appointment{box-shadow:none}.next-card{background:#fff;color:#000;border:2px solid #000}.next-card *{color:#000!important}.next-day{box-shadow:none;border:2px solid #000}.appointment{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -235,7 +265,21 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
     <button class="btn btn-exame btn-large" id="new-exame-btn">🧪 NOVO EXAME</button>
     <button class="btn btn-green btn-large" id="show-upcoming">MINHAS CONSULTAS</button>
     <button class="btn btn-large" id="show-history">HISTÓRICO</button>
+    <button class="btn btn-glic btn-large" id="glic-btn">🩸 ANOTAR GLICOSE</button>
   </section>
+  <section class="panel no-print" id="glic-panel" aria-labelledby="glic-titulo">
+    <div class="topline"><h2 id="glic-titulo">🩸 MINHA GLICOSE</h2><button class="btn btn-small" id="glic-print">🖨️ IMPRIMIR PARA O MÉDICO</button></div>
+    <div id="glic-erro" class="status-message hidden" role="alert"></div>
+    <div class="glic-ultima" id="glic-ultima"></div>
+    <div id="glic-alerta" class="glic-alerta hidden" role="alert"></div>
+    <h3 style="margin-top:20px">ÚLTIMOS 7 DIAS</h3>
+    <div class="glic-grafico" id="glic-grafico"></div>
+    <div class="glic-legenda"><span><i class="dot verde"></i>DENTRO DA META</span><span><i class="dot amarelo"></i>UM POUCO FORA</span><span><i class="dot vermelho"></i>ALTA OU BAIXA</span></div>
+    <h3 style="margin-top:20px">ÚLTIMAS MEDIÇÕES</h3>
+    <div id="glic-lista" class="glic-lista"></div>
+    <p class="help" style="margin-top:14px">Metas usadas: em jejum e antes das refeições de 80 a 130; 2 horas depois das refeições até 180; antes de dormir de 90 a 150 (referência comum para adultos com diabetes). Se o médico passar outras metas, elas podem ser trocadas.</p>
+  </section>
+  <section id="relatorio-glicose" class="relatorio"></section>
   <section class="panel" id="list-panel">
     <h2 id="list-heading">MINHAS CONSULTAS</h2>
     <div class="toolbar no-print">
@@ -272,6 +316,16 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
   <div class="dialog-actions"><button type="button" class="btn btn-red" id="delete-from-form">EXCLUIR</button><div><button type="button" class="btn" id="cancel-form">CANCELAR</button><button type="submit" class="btn btn-primary" id="save-btn">SALVAR CONSULTA</button></div></div>
 </form>
 </dialog>
+<dialog id="glic-dialog"><form id="glic-form" class="dialog-body">
+  <h2>🩸 ANOTAR GLICOSE</h2>
+  <div class="field"><label for="glic-valor">QUANTO DEU NO APARELHO? (mg/dL) *</label><input id="glic-valor" class="glic-input" type="number" inputmode="numeric" min="20" max="600" step="1" required placeholder="EX.: 120"></div>
+  <fieldset class="glic-momentos"><legend>QUANDO FOI A MEDIÇÃO? *</legend><div id="glic-momentos"></div></fieldset>
+  <div class="field"><label for="glic-quando">DATA E HORA</label><input id="glic-quando" type="datetime-local" required></div>
+  <div class="field"><label for="glic-obs">OBSERVAÇÃO (OPCIONAL)</label><input id="glic-obs" placeholder="EX.: COMI DOCE NO ALMOÇO"></div>
+  <div id="glic-form-erro" class="status-message hidden" role="alert"></div>
+  <div class="dialog-actions"><span></span><div><button type="button" class="btn" id="glic-cancelar">CANCELAR</button><button type="submit" class="btn btn-primary" id="glic-salvar">SALVAR</button></div></div>
+</form></dialog>
+<dialog id="glic-resultado"><div class="dialog-body"><div id="glic-resultado-conteudo"></div><div class="dialog-actions"><span></span><button class="btn btn-primary" id="glic-ok">ENTENDI</button></div></div></dialog>
 <dialog id="confirm-dialog"><div class="dialog-body"><h2>CONFIRMAR EXCLUSÃO?</h2><p id="confirm-text"></p><div class="dialog-actions"><button class="btn" id="keep-btn">NÃO, VOLTAR</button><button class="btn btn-red" id="confirm-delete">SIM, EXCLUIR</button></div></div></dialog>
 
 <script type="module">
@@ -366,7 +420,100 @@ function renderList(){
  return `<article class="appointment${ehExame(c)?' exame':''}"><div class="datebox"><strong>${pad(c.when.getDate())}</strong><span>${c.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div><div class="appointment-title">${ehExame(c)?'🧪 ':''}${escapeHtml(c.especialidade)}${c.medico?' — '+escapeHtml(c.medico):''}</div><div class="detail">${escapeHtml(fmtDate(c.when))} • ÀS ${dateTime(c.when)}</div>${c.local?`<div class="detail">${ehExame(c)?'LABORATÓRIO':'LOCAL'}: ${escapeHtml(c.local)}</div>`:''}${status==='agendada'&&textoJejum(c)?`<div class="jejum">${textoJejum(c)}</div>`:''}${c.telefone?`<div class="detail">TELEFONE: ${escapeHtml(c.telefone)}</div>`:''}${c.observacoes?`<div class="detail">OBSERVAÇÕES: ${escapeHtml(c.observacoes)}</div>`:''}${status==='agendada'?tempoLinha(c.when):''}<div class="tags"><span class="tag tag-tipo-${ehExame(c)?'exame':'consulta'}">${ehExame(c)?'🧪 EXAME':'🩺 CONSULTA'}</span><span class="tag tag-${status}">${label}</span></div><div class="item-actions no-print"><button class="btn btn-small" data-edit="${escapeHtml(c.id)}">EDITAR</button><button class="btn btn-small btn-red" data-delete="${escapeHtml(c.id)}">EXCLUIR</button><button class="btn btn-small" data-speak="${escapeHtml(c.id)}">🔊 OUVIR</button></div></div></article>`
  }).join('');
 }
-function render(){renderHome();renderList()}
+function render(){renderHome();renderList();renderGlicose()}
+
+// ===================== CONTROLE DE GLICOSE =====================
+// Metas (mg/dL). Referência comum para adultos com diabetes — trocar se o médico passar outras.
+const METAS={jejum:[80,130],antes:[80,130],depois:[70,180],dormir:[90,150],outro:[80,180]};
+const MOMENTOS=[
+ {id:'jejum',nome:'EM JEJUM',meta:'jejum'},
+ {id:'antes_almoco',nome:'ANTES DO ALMOÇO',meta:'antes'},
+ {id:'depois_almoco',nome:'2H DEPOIS DO ALMOÇO',meta:'depois'},
+ {id:'antes_jantar',nome:'ANTES DO JANTAR',meta:'antes'},
+ {id:'depois_jantar',nome:'2H DEPOIS DO JANTAR',meta:'depois'},
+ {id:'dormir',nome:'ANTES DE DORMIR',meta:'dormir'},
+ {id:'outro',nome:'OUTRO HORÁRIO',meta:'outro'}];
+const momentoInfo=id=>MOMENTOS.find(m=>m.id===id)||MOMENTOS[MOMENTOS.length-1];
+state.glic=[];state.glicMomento='jejum';state.glicOk=true;
+
+function classificar(v,momento){
+ const [min,max]=METAS[momentoInfo(momento).meta];
+ if(v<54)return{cor:'vermelho',txt:'MUITO BAIXA',perigo:'baixa'};
+ if(v<70)return{cor:'vermelho',txt:'BAIXA',perigo:'baixa'};
+ if(v>=300)return{cor:'vermelho',txt:'MUITO ALTA',perigo:'alta'};
+ if(v<min)return{cor:'amarelo',txt:'UM POUCO BAIXA'};
+ if(v<=max)return{cor:'verde',txt:'DENTRO DA META'};
+ if(v<=max+50)return{cor:'amarelo',txt:'UM POUCO ALTA'};
+ return{cor:'vermelho',txt:'ALTA'};
+}
+function avisoPerigo(c){
+ if(c.perigo==='baixa')return'⚠️ GLICOSE BAIXA. SIGA A ORIENTAÇÃO DO SEU MÉDICO PARA HIPOGLICEMIA. SE TIVER TONTURA, SUOR FRIO, TREMEDEIRA OU CONFUSÃO, PEÇA AJUDA OU LIGUE 192 (SAMU).';
+ if(c.perigo==='alta')return'⚠️ GLICOSE MUITO ALTA. AVISE O MÉDICO. SE TIVER MUITA SEDE, VÔMITO, FALTA DE AR OU MUITA SONOLÊNCIA, PROCURE ATENDIMENTO OU LIGUE 192 (SAMU).';
+ return'';
+}
+function momentoPelaHora(d){const m=d.getHours()*60+d.getMinutes();
+ if(m<10*60)return'jejum';if(m<12*60)return'antes_almoco';if(m<16*60)return'depois_almoco';
+ if(m<19*60+30)return'antes_jantar';if(m<21*60+30)return'depois_jantar';return'dormir'}
+function paraLocalInput(d){return `${dateKey(d)}T${dateTime(d)}`}
+function quandoCurto(d){const r=quandoRel(d);return (r==='HOJE'?'HOJE':r==='AMANHÃ'?'AMANHÃ':d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}))+' ÀS '+dateTime(d)}
+
+async function carregarGlicose(){
+ const {data,error}=await sb.from('glicemias').select('*').order('medido_em',{ascending:false}).limit(500);
+ if(error){state.glicOk=false;state.glic=[];
+  showError($('glic-erro'),/glicemias|schema cache|does not exist/i.test(error.message)?'FALTA PREPARAR O BANCO: RODE O ARQUIVO glicose.sql NO SUPABASE.':'ERRO AO CARREGAR A GLICOSE: '+error.message);
+ }else{state.glicOk=true;showError($('glic-erro'),'');state.glic=(data||[]).map(r=>({...r,quando:new Date(r.medido_em)}))}
+ renderGlicose();
+}
+
+function graficoSemana(lista){
+ const estreito=window.innerWidth<700,W=estreito?360:720,H=estreito?280:250,L=42,R=10,T=14,B=36,fim=new Date();fim.setHours(23,59,59,999);
+ const ini=new Date(fim);ini.setDate(ini.getDate()-6);ini.setHours(0,0,0,0);
+ const pts=lista.filter(m=>m.quando>=ini&&m.quando<=fim).sort((a,b)=>a.quando-b.quando);
+ if(!pts.length)return'<p class="empty" style="margin:0">ANOTE A GLICOSE PARA VER O GRÁFICO DA SEMANA.</p>';
+ const ymin=40,ymax=Math.max(300,...pts.map(p=>p.valor+20));
+ const x=t=>L+(t-ini)/(fim-ini)*(W-L-R), y=v=>T+(1-(Math.min(Math.max(v,ymin),ymax)-ymin)/(ymax-ymin))*(H-T-B);
+ const cor={verde:'#0B7A4B',amarelo:'#E0A100',vermelho:'#C0261A'};
+ let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico da glicose dos últimos 7 dias">`;
+ g+=`<rect x="${L}" y="${y(180)}" width="${W-L-R}" height="${y(70)-y(180)}" fill="#E5F5EC"/>`;
+ [70,130,180,250].filter(v=>v<ymax).forEach(v=>{g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${v===70?'#C0261A':'#D8D2C7'}" stroke-dasharray="${v===70?'6 4':'0'}"/><text x="${L-8}" y="${y(v)+5}" text-anchor="end" font-size="15" fill="#4A5568" font-family="inherit">${v}</text>`});
+ for(let i=0;i<7;i++){const d=new Date(ini);d.setDate(d.getDate()+i);d.setHours(12);const lab=estreito?d.toLocaleDateString('pt-BR',{weekday:'narrow'}).toUpperCase():d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','').toUpperCase();g+=`<text x="${x(d)}" y="${H-10}" text-anchor="middle" font-size="15" font-weight="700" fill="#4A5568" font-family="inherit">${lab}</text>`}
+ g+=`<polyline fill="none" stroke="#9AA7BD" stroke-width="2.5" points="${pts.map(p=>x(p.quando)+','+y(p.valor)).join(' ')}"/>`;
+ pts.forEach(p=>{const c=classificar(p.valor,p.momento);g+=`<circle cx="${x(p.quando)}" cy="${y(p.valor)}" r="${estreito?6:8}" fill="${cor[c.cor]}" stroke="#fff" stroke-width="2.5"><title>${p.valor} — ${momentoInfo(p.momento).nome}</title></circle>`});
+ return g+'</svg>';
+}
+
+function renderGlicose(){
+ if(!$('glic-panel'))return;
+ const ult=state.glic[0];
+ if(!ult){$('glic-ultima').innerHTML=state.glicOk?'<p style="margin:0;font-weight:700">NENHUMA MEDIÇÃO AINDA. TOQUE EM <b>🩸 ANOTAR GLICOSE</b> PARA COMEÇAR.</p>':'';$('glic-alerta').classList.add('hidden')}
+ else{const c=classificar(ult.valor,ult.momento);
+  $('glic-ultima').innerHTML=`<div class="glic-num num-${c.cor}">${ult.valor}<small>mg/dL</small></div><div class="glic-info"><span class="glic-sit sit-${c.cor}">${c.txt}</span><div>ÚLTIMA: ${momentoInfo(ult.momento).nome}</div><div style="font-weight:400">${quandoCurto(ult.quando)}</div></div>`;
+  const av=avisoPerigo(c);$('glic-alerta').textContent=av;$('glic-alerta').classList.toggle('hidden',!av||(Date.now()-ult.quando)>6*3600000);
+ }
+ $('glic-grafico').innerHTML=graficoSemana(state.glic);
+ const rec=state.glic.slice(0,8);
+ $('glic-lista').innerHTML=rec.length?rec.map(m=>{const c=classificar(m.valor,m.momento);return `<div class="glic-item"><div class="v num-${c.cor}">${m.valor}</div><div class="d">${momentoInfo(m.momento).nome} · <span class="glic-sit sit-${c.cor}" style="display:inline;padding:2px 10px;border-radius:99px">${c.txt}</span><span>${quandoCurto(m.quando)}${m.observacao?' — '+escapeHtml(m.observacao):''}</span></div><button class="btn btn-small btn-red" data-glic-del="${escapeHtml(m.id)}">EXCLUIR</button></div>`}).join(''):'';
+}
+
+function abrirGlicose(){
+ const agora=new Date();$('glic-form').reset();showError($('glic-form-erro'),'');
+ state.glicMomento=momentoPelaHora(agora);$('glic-quando').value=paraLocalInput(agora);
+ $('glic-momentos').innerHTML=MOMENTOS.map(m=>`<button type="button" class="btn" data-momento="${m.id}" aria-pressed="${m.id===state.glicMomento}">${m.nome}</button>`).join('');
+ $('glic-dialog').showModal();setTimeout(()=>$('glic-valor').focus(),50);
+}
+
+async function imprimirGlicose(){
+ const lim=new Date();lim.setDate(lim.getDate()-30);lim.setHours(0,0,0,0);
+ const lista=state.glic.filter(m=>m.quando>=lim).sort((a,b)=>a.quando-b.quando);
+ let nome='';try{const {data:{user}}=await sb.auth.getUser();nome=(user?.email||'').split('@')[0].replace(/[._-]+/g,' ').toUpperCase()}catch(e){}
+ const media=a=>a.length?Math.round(a.reduce((s,m)=>s+m.valor,0)/a.length):'—';
+ const jej=lista.filter(m=>m.momento==='jejum');
+ $('relatorio-glicose').innerHTML=`<h2>RELATÓRIO DE GLICOSE${nome?' — '+escapeHtml(nome):''}</h2><p>PERÍODO: ${lim.toLocaleDateString('pt-BR')} A ${new Date().toLocaleDateString('pt-BR')} (ÚLTIMOS 30 DIAS)</p><div class="resumo"><b>MEDIÇÕES: ${lista.length}</b><b>MÉDIA GERAL: ${media(lista)} mg/dL</b><b>MÉDIA EM JEJUM: ${media(jej)} mg/dL</b><b>ABAIXO DE 70: ${lista.filter(m=>m.valor<70).length}</b><b>ACIMA DE 180: ${lista.filter(m=>m.valor>180).length}</b></div><table><thead><tr><th>DATA</th><th>HORA</th><th>MOMENTO</th><th>mg/dL</th><th>SITUAÇÃO</th><th>OBSERVAÇÃO</th></tr></thead><tbody>${lista.map(m=>`<tr><td>${m.quando.toLocaleDateString('pt-BR')}</td><td>${dateTime(m.quando)}</td><td>${momentoInfo(m.momento).nome}</td><td><b>${m.valor}</b></td><td>${classificar(m.valor,m.momento).txt}</td><td>${escapeHtml(m.observacao||'')}</td></tr>`).join('')||'<tr><td colspan="6">NENHUMA MEDIÇÃO NO PERÍODO.</td></tr>'}</tbody></table>`;
+ document.body.classList.add('print-glicose');
+ const limpar=()=>{document.body.classList.remove('print-glicose');window.removeEventListener('afterprint',limpar)};
+ window.addEventListener('afterprint',limpar);window.print();setTimeout(limpar,1500);
+}
+
 
 // ---------- Previsão do tempo (Open-Meteo, grátis, sem cadastro) ----------
 const CIDADE={nome:'SÃO PAULO',lat:-23.55,lon:-46.63};
@@ -412,7 +559,7 @@ function renderTempoHoje(){
 async function load(){
  const {data,error}=await sb.from('consultas').select('*').order('data_hora',{ascending:true});
  if(error){showError($('app-error'),'ERRO AO CARREGAR CONSULTAS: '+error.message);return}
- showError($('app-error'),'');state.items=sortItems((data||[]).map(toAppointment));render();
+ showError($('app-error'),'');state.items=sortItems((data||[]).map(toAppointment));render();carregarGlicose();
 }
 function openForm(item,tipo){
  state.editing=item||null;showError($('form-error'),'');$('appointment-form').reset();
@@ -458,6 +605,28 @@ const {data:{session}}=await sb.auth.getSession();
 $('login-screen').classList.toggle('hidden',!!session);$('app').classList.toggle('hidden',!session);if(session)await load();
 setInterval(()=>{if(!$('app').classList.contains('hidden'))renderHome()},30000);
 carregarTempo();setInterval(carregarTempo,30*60000);
+// ---- eventos da glicose ----
+$('glic-btn').onclick=abrirGlicose;
+$('glic-print').onclick=imprimirGlicose;
+$('glic-cancelar').onclick=()=>$('glic-dialog').close();
+$('glic-ok').onclick=()=>$('glic-resultado').close();
+$('glic-momentos').addEventListener('click',e=>{const b=e.target.closest('[data-momento]');if(!b)return;state.glicMomento=b.dataset.momento;document.querySelectorAll('#glic-momentos [data-momento]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+$('glic-form').addEventListener('submit',async e=>{
+ e.preventDefault();const v=parseInt($('glic-valor').value,10);
+ if(!(v>=20&&v<=600)){showError($('glic-form-erro'),'DIGITE UM VALOR ENTRE 20 E 600.');return}
+ const q=new Date($('glic-quando').value);if(Number.isNaN(q.getTime())){showError($('glic-form-erro'),'INFORME A DATA E A HORA.');return}
+ $('glic-salvar').disabled=true;
+ const {error}=await sb.from('glicemias').insert({valor:v,momento:state.glicMomento,medido_em:q.toISOString(),observacao:$('glic-obs').value.trim().toUpperCase()||null});
+ $('glic-salvar').disabled=false;
+ if(error){showError($('glic-form-erro'),/glicemias|schema cache|does not exist/i.test(error.message)?'FALTA PREPARAR O BANCO: RODE O ARQUIVO glicose.sql NO SUPABASE.':'NÃO FOI POSSÍVEL SALVAR: '+error.message);return}
+ $('glic-dialog').close();
+ const c=classificar(v,state.glicMomento),av=avisoPerigo(c);
+ $('glic-resultado-conteudo').innerHTML=`<h2 style="text-align:center">GLICOSE ANOTADA ✔</h2><div class="glic-res-num num-${c.cor}">${v}</div><p class="glic-res-txt"><span class="glic-sit sit-${c.cor}" style="padding:6px 16px;border-radius:99px">${c.txt}</span></p><p style="text-align:center;font-weight:700">${momentoInfo(state.glicMomento).nome}</p>${av?`<div class="glic-alerta">${av}</div>`:''}`;
+ $('glic-resultado').showModal();await carregarGlicose();
+});
+$('glic-lista').addEventListener('click',async e=>{const b=e.target.closest('[data-glic-del]');if(!b)return;const m=state.glic.find(x=>String(x.id)===b.dataset.glicDel);if(!m)return;
+ if(!window.confirm('EXCLUIR A MEDIÇÃO DE '+m.valor+' ('+quandoCurto(m.quando)+')?'))return;
+ const {error}=await sb.from('glicemias').delete().eq('id',m.id);if(error){showError($('glic-erro'),'NÃO FOI POSSÍVEL EXCLUIR: '+error.message);return}await carregarGlicose()});
 </script>
 </body>
 </html>
