@@ -69,7 +69,7 @@ function cabecalhos(extra = {}) {
 async function buscarConsultas() {
   const ate = new Date(AGORA.getTime() + (AVISO_DIA_HORAS + 1) * 3600e3).toISOString();
   const url = SUPABASE_URL + '/rest/v1/consultas' +
-    '?select=id,data_hora,especialidade,medico,local,telefone,observacoes,aviso_dia_enviado,aviso_horas_enviado' +
+    '?select=*' +
     '&status=eq.agendada' +
     '&data_hora=gt.' + encodeURIComponent(AGORA.toISOString()) +
     '&data_hora=lte.' + encodeURIComponent(ate) +
@@ -104,12 +104,19 @@ function quandoTexto(d) {
 
 function mensagem(c, tipo) {
   const d = new Date(c.data_hora);
+  const exame = c.tipo === 'exame';
   const linhas = [
-    tipo === 'perto' ? '⏰ *SUA CONSULTA É DAQUI A POUCO*' : '🩺 *LEMBRETE DE CONSULTA*',
+    exame
+      ? (tipo === 'perto' ? '⏰ *SEU EXAME É DAQUI A POUCO*' : '🧪 *LEMBRETE DE EXAME*')
+      : (tipo === 'perto' ? '⏰ *SUA CONSULTA É DAQUI A POUCO*' : '🩺 *LEMBRETE DE CONSULTA*'),
     '',
     '*' + quandoTexto(d) + '*',
-    (c.especialidade || '').toUpperCase() + (c.medico ? ' — ' + c.medico.toUpperCase() : ''),
+    (c.especialidade || '').toUpperCase() + (c.medico ? (exame ? ' — PEDIDO POR ' : ' — ') + c.medico.toUpperCase() : ''),
   ];
+  if (exame && c.jejum_horas) {
+    const ini = new Date(d.getTime() - c.jejum_horas * 3600e3);
+    linhas.push('', '⏳ *JEJUM DE ' + c.jejum_horas + ' HORAS: NÃO COMER DEPOIS DAS ' + fmtHora.format(ini) + ' (' + quandoTexto(ini).split(',')[0] + ')*');
+  }
   if (c.local) linhas.push('📍 ' + c.local.toUpperCase());
   if (c.telefone) linhas.push('☎️ ' + c.telefone);
   if (c.observacoes) linhas.push('', '📝 ' + c.observacoes.toUpperCase());
