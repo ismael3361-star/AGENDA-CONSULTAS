@@ -225,7 +225,24 @@ async function enviarWhatsApp(texto) {
 }
 
 // ---------- principal ----------
+// Mostra no registro, de forma clara, por onde os avisos vão sair (e-mails parcialmente escondidos)
+const esconder = (e) => { const [u, d] = e.split('@'); return (u || '').slice(0, 3) + '•••@' + (d || ''); };
+function mostrarCanais() {
+  const faltam = [['EMAIL_REMETENTE', EMAIL_REMETENTE], ['EMAIL_SENHA_APP', EMAIL_SENHA_APP], ['EMAIL_DESTINOS', EMAIL_DESTINOS.length ? 'x' : '']]
+    .filter(([, v]) => !v).map(([n]) => n);
+  if (EMAIL_ATIVO) {
+    console.log('E-MAIL: LIGADO. Envia de ' + esconder(EMAIL_REMETENTE) + ' para: ' + EMAIL_DESTINOS.map(esconder).join(', '));
+    if (EMAIL_SENHA_APP.length !== 16) console.log('  ATENÇÃO: a senha de app do Google tem 16 letras; a cadastrada tem ' + EMAIL_SENHA_APP.length + '.');
+    if (EMAIL_DESTINOS.some((e) => e.toLowerCase() === EMAIL_REMETENTE.toLowerCase()))
+      console.log('  ATENÇÃO: um destinatário é o MESMO e-mail que envia. O Gmail costuma guardar esse e-mail só em "Enviados", e não na Caixa de Entrada.');
+  } else {
+    console.log('E-MAIL: DESLIGADO. Falta(m) o(s) segredo(s): ' + faltam.join(', ') + ' (confira se o nome está escrito exatamente assim).');
+  }
+  console.log('WHATSAPP: ' + (CONTATOS.length ? 'LIGADO para ' + CONTATOS.length + ' número(s).' : 'DESLIGADO (sem WHATSAPP_CONTATOS).'));
+}
+
 async function principal() {
+  mostrarCanais();
   if (MODO_TESTE) {
     console.log('Enviando mensagem de teste…');
     const ok = await enviar('✅ *TESTE DA AGENDA DE CONSULTAS*\n\nSE VOCÊ RECEBEU ESTA MENSAGEM, OS AVISOS ESTÃO FUNCIONANDO.');
