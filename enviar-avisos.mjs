@@ -111,7 +111,7 @@ function mensagem(c, tipo) {
       : (tipo === 'perto' ? '⏰ *SUA CONSULTA É DAQUI A POUCO*' : '🩺 *LEMBRETE DE CONSULTA*'),
     '',
     '*' + quandoTexto(d) + '*',
-    (c.especialidade || '').toUpperCase() + (c.medico ? (exame ? ' — PEDIDO POR ' : ' — ') + c.medico.toUpperCase() : ''),
+    (c.especialidade || '').toUpperCase() + (c.medico ? ' — ' + c.medico.toUpperCase() : ''),
   ];
   if (exame && c.jejum_horas) {
     const ini = new Date(d.getTime() - c.jejum_horas * 3600e3);
