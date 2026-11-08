@@ -51,6 +51,13 @@ const CONTATOS = PARTES
   .filter((c) => c.numero.length > 8 && c.apikey);
 
 if (!CHAVE) sair('Falta o segredo SUPABASE_SECRET_KEY.');
+// A chave precisa ser a SECRETA: com a chave pública o banco esconde as consultas e nenhum aviso sai.
+if (CHAVE.startsWith('sb_publishable_')) sair('O segredo SUPABASE_SECRET_KEY está com a chave PÚBLICA (sb_publishable_...). Troque pela chave SECRETA (sb_secret_...) do Supabase.');
+if (!CHAVE.startsWith('sb_')) {
+  let papel = '';
+  try { papel = JSON.parse(Buffer.from(CHAVE.split('.')[1], 'base64url').toString()).role; } catch {}
+  if (papel && papel !== 'service_role') sair('O segredo SUPABASE_SECRET_KEY está com a chave "' + papel + '". Use a chave "service_role" ou a chave secreta (sb_secret_...).');
+}
 if (!CONTATOS.length && !NTFY_CANAL && !EMAIL_ATIVO) sair('Nenhum canal configurado: preencha EMAIL_REMETENTE, EMAIL_SENHA_APP e EMAIL_DESTINOS (ou WHATSAPP_CONTATOS).');
 
 function sair(msg) {
@@ -227,14 +234,15 @@ async function principal() {
   }
 
   const consultas = await buscarConsultas();
-  console.log(consultas.length + ' consulta(s) nas próximas ' + AVISO_DIA_HORAS + 'h.');
+  console.log('Agora (São Paulo): ' + quandoTexto(AGORA) + '. ' + consultas.length + ' consulta(s)/exame(s) nas próximas ' + AVISO_DIA_HORAS + 'h.');
+  if (!consultas.length) console.log('Nada para avisar agora. (Só entram consultas AGENDADAS que acontecem nas próximas 24 horas.)');
 
   for (const c of consultas) {
     const horas = (new Date(c.data_hora) - AGORA) / 3600e3;
     let tipo = null;
     if (!c.aviso_horas_enviado && horas <= AVISO_PERTO_HORAS) tipo = 'perto';
     else if (!c.aviso_dia_enviado && horas <= AVISO_DIA_HORAS && horas > AVISO_PERTO_HORAS) tipo = 'dia';
-    if (!tipo) continue;
+    if (!tipo) { console.log('Já avisada: ' + c.especialidade + ' em ' + quandoTexto(new Date(c.data_hora))); continue; }
 
     console.log('Aviso "' + tipo + '": ' + c.especialidade + ' em ' + quandoTexto(new Date(c.data_hora)));
     const ok = await enviar(mensagem(c, tipo));
