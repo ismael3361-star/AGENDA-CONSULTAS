@@ -95,7 +95,20 @@ header .btn{min-height:50px;padding:8px 16px;border-radius:14px;font-size:calc(1
 .metric span{font-weight:700;color:var(--muted);font-size:calc(17px * var(--font-scale));letter-spacing:.04em}
 
 /* Ações principais */
-.action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.action-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.action-grid button{font-size:calc(21px * var(--font-scale))!important}
+.btn-exame{background:#5B3BB5;border-color:#5B3BB5;color:#fff;box-shadow:0 6px 16px rgba(91,59,181,.28)}
+.btn-exame:hover{background:#472C93;border-color:#472C93}
+.tag-tipo-consulta{background:#E8EEFF;color:#14347F}
+.tag-tipo-exame{background:#EEE8FF;color:#4A2C9A}
+.appointment.exame .datebox{background:#EEE8FF}.appointment.exame .datebox strong,.appointment.exame .datebox span{color:#4A2C9A}
+.jejum{display:inline-block;margin-top:6px;background:#FFF1C2;color:#6B4200;border-radius:12px;padding:6px 12px;font-weight:700}
+.next-card .jejum{position:relative;z-index:1;margin:0 0 10px}
+.tipo-escolha{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.tipo-escolha button{min-height:66px;font-size:calc(22px * var(--font-scale))}
+.tipo-escolha button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+.tipo-escolha button[data-tipo=exame][aria-pressed=true]{background:#5B3BB5;border-color:#5B3BB5}
+.notice-jejum{background:#FFF1C2;color:#5C3A00;border:2px solid #F0C64A}
 .btn-glic{background:#9B1C47;border-color:#9B1C47;color:#fff;box-shadow:0 6px 16px rgba(155,28,71,.28)}
 .btn-glic:hover{background:#7A1538;border-color:#7A1538}
 .glic-ultima{display:flex;align-items:center;gap:22px;flex-wrap:wrap;border-radius:20px;padding:18px 22px;background:#FAF8F4;border:1px solid var(--line)}
@@ -185,7 +198,7 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
 .easy-mode .btn-large{min-height:84px}
 .easy-mode .action-grid button{min-height:96px}
 
-@media(max-width:1000px) and (min-width:761px){.action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1100px) and (min-width:761px){.action-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){
   main{padding:14px 12px 30px;gap:16px}
   .panel{padding:20px;border-radius:22px}
@@ -236,9 +249,10 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
   <section class="panel">
     <div class="topline"><div><h2 id="greeting">BOM DIA!</h2><p id="frase" style="margin:0 0 6px;font-weight:900;color:#7A2E8E;font-size:calc(23px * var(--font-scale))"></p><p id="today-label" class="help"></p><div id="tempo-hoje" class="tempo-hoje hidden" aria-live="polite"></div></div><button class="btn btn-small no-print" id="listen-home">🔊 OUVIR RESUMO</button></div>
     <div id="alert-box" class="notice notice-red hidden" role="alert" aria-live="assertive"></div>
+    <div id="jejum-box" class="notice notice-jejum hidden" role="status"></div>
     <div class="next-card" id="next-card">
-      <h2>PRÓXIMA CONSULTA</h2><div id="next-content">Carregando consultas...</div>
-      <button class="btn btn-small no-print" id="listen-next">🔊 OUVIR PRÓXIMA CONSULTA</button>
+      <h2 id="next-titulo">PRÓXIMA CONSULTA</h2><div id="next-content">Carregando consultas...</div>
+      <button class="btn btn-small no-print" id="listen-next">🔊 OUVIR</button>
     </div>
     <div class="home-grid" style="margin-top:14px">
       <div class="metric"><strong id="count-upcoming">0</strong><span>CONSULTAS FUTURAS</span></div>
@@ -248,6 +262,7 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
   </section>
   <section class="action-grid no-print">
     <button class="btn btn-primary btn-large" id="new-btn">＋ NOVA CONSULTA</button>
+    <button class="btn btn-exame btn-large" id="new-exame-btn">🧪 NOVO EXAME</button>
     <button class="btn btn-green btn-large" id="show-upcoming">MINHAS CONSULTAS</button>
     <button class="btn btn-large" id="show-history">HISTÓRICO</button>
     <button class="btn btn-glic btn-large" id="glic-btn">🩸 ANOTAR GLICOSE</button>
@@ -272,6 +287,7 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
         <button class="btn btn-small" data-filter="upcoming" aria-pressed="true">PRÓXIMAS</button>
         <button class="btn btn-small" data-filter="past" aria-pressed="false">ANTERIORES</button>
         <button class="btn btn-small" data-filter="all" aria-pressed="false">TODAS</button>
+        <button class="btn btn-small" data-filter="exames" aria-pressed="false">🧪 EXAMES</button>
       </div>
       <input class="search" id="search" type="search" placeholder="BUSCAR MÉDICO OU EXAME" aria-label="Buscar consulta">
     </div>
@@ -285,12 +301,14 @@ footer{text-align:center;color:#8A8377;font-size:16px;padding:10px 10px 28px;let
 <dialog id="appointment-dialog">
 <form id="appointment-form" class="dialog-body">
   <h2 id="form-title">NOVA CONSULTA</h2>
+  <div class="tipo-escolha" role="group" aria-label="Tipo"><button type="button" class="btn" data-tipo="consulta" aria-pressed="true">🩺 CONSULTA</button><button type="button" class="btn" data-tipo="exame" aria-pressed="false">🧪 EXAME</button></div>
   <p class="help">Preencha os campos abaixo. Os campos com * são obrigatórios.</p>
   <div class="field"><label for="date">DATA *</label><input id="date" type="date" required></div>
   <div class="field"><label for="time">HORÁRIO *</label><input id="time" type="time" required></div>
-  <div class="field"><label for="specialty">MÉDICO, ESPECIALIDADE OU EXAME *</label><input id="specialty" list="specialties" required placeholder="EX.: CARDIOLOGISTA"><datalist id="specialties"><option>CARDIOLOGISTA</option><option>CLÍNICO GERAL</option><option>DERMATOLOGISTA</option><option>DENTISTA</option><option>EXAME DE SANGUE</option><option>OFTALMOLOGISTA</option><option>ORTOPEDISTA</option></datalist></div>
-  <div class="field"><label for="doctor">NOME DO MÉDICO</label><input id="doctor" placeholder="NOME DO MÉDICO"></div>
-  <div class="field"><label for="place">LOCAL / ENDEREÇO</label><input id="place" placeholder="NOME DA CLÍNICA E ENDEREÇO"></div>
+  <div class="field"><label for="specialty" id="lbl-specialty">MÉDICO OU ESPECIALIDADE *</label><input id="specialty" list="specialties" required placeholder="EX.: CARDIOLOGISTA"><datalist id="specialties"></datalist></div>
+  <div class="field"><label for="doctor" id="lbl-doctor">NOME DO MÉDICO</label><input id="doctor" placeholder="NOME DO MÉDICO"></div>
+  <div class="field"><label for="place" id="lbl-place">LOCAL / ENDEREÇO</label><input id="place" placeholder="NOME DA CLÍNICA E ENDEREÇO"></div>
+  <div class="field hidden" id="campo-jejum"><label for="jejum">PRECISA DE JEJUM?</label><select id="jejum"><option value="">NÃO PRECISA DE JEJUM</option><option value="3">JEJUM DE 3 HORAS</option><option value="4">JEJUM DE 4 HORAS</option><option value="6">JEJUM DE 6 HORAS</option><option value="8">JEJUM DE 8 HORAS</option><option value="10">JEJUM DE 10 HORAS</option><option value="12">JEJUM DE 12 HORAS</option></select></div>
   <div class="field"><label for="phone">TELEFONE DA CLÍNICA</label><input id="phone" type="tel" placeholder="TELEFONE"></div>
   <div class="field"><label for="status">SITUAÇÃO</label><select id="status"><option value="agendada">AGENDADA</option><option value="realizada">REALIZADA</option><option value="cancelada">CANCELADA</option></select></div>
   <div class="field"><label for="notes">O QUE LEVAR / OBSERVAÇÕES</label><textarea id="notes" placeholder="EX.: LEVAR EXAMES, DOCUMENTOS OU IR EM JEJUM"></textarea></div>
@@ -329,7 +347,7 @@ function nameToEmail(name){const v=name.trim().toLowerCase();if(v.includes('@'))
 function say(text){if(!('speechSynthesis' in window)){alert('A leitura por voz não está disponível neste navegador.');return}window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='pt-BR';u.rate=.88;window.speechSynthesis.speak(u)}
 function playAlertSound(){if(!state.soundEnabled||!audioContext)return;try{if(audioContext.state==='suspended')audioContext.resume();const start=audioContext.currentTime;[0,.28,.56].forEach((offset,i)=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type='sine';osc.frequency.value=i===1?880:660;gain.gain.setValueAtTime(.0001,start+offset);gain.gain.exponentialRampToValueAtTime(.22,start+offset+.025);gain.gain.exponentialRampToValueAtTime(.0001,start+offset+.22);osc.connect(gain);gain.connect(audioContext.destination);osc.start(start+offset);osc.stop(start+offset+.24)})}catch(e){console.warn('Não foi possível tocar o alerta sonoro',e)}}
 async function enableSound(){try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx){alert('O som de alerta não é compatível com este navegador.');return}audioContext=audioContext||new AudioCtx();await audioContext.resume();state.soundEnabled=true;$('sound-toggle').textContent='🔔 SOM ATIVO';$('sound-toggle').setAttribute('aria-pressed','true');playAlertSound();const now=new Date();const active=state.items.find(x=>x.status==='agendada'&&x.when>=now&&(x.when-now)/60000<=120);if(active&&!state.soundPlayed.has(String(active.id))){state.soundPlayed.add(String(active.id));setTimeout(playAlertSound,900)}}catch(e){alert('Não foi possível ativar o som. Toque novamente no botão.')}}
-function fmtDate(d){return d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}
+function fmtDate(d){return d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).toUpperCase()}
 const FRASES=['COMO ESTÁ O CASAL MAIS FOFO DO BRASIL? 💕','QUE ALEGRIA VER VOCÊS POR AQUI! 😊','VOCÊS SÃO O ORGULHO DA FAMÍLIA! ❤️','O CASAL MAIS LINDO DE SÃO PAULO CHEGOU! 🌹','HOJE É UM ÓTIMO DIA PARA SORRIR JUNTOS! 😄','JUNTOS, VOCÊS DEIXAM TUDO MAIS BONITO! 💐','QUE DEUS ABENÇOE O DIA DE VOCÊS! 🙏','SAÚDE E MUITO AMOR PARA O CASAL MAIS QUERIDO! 💖','VOCÊS SÃO EXEMPLO DE AMOR E PARCERIA! 👫','BEM-VINDOS! A FAMÍLIA AMA MUITO VOCÊS! 🥰','QUE O DIA DE VOCÊS SEJA LEVE E CHEIO DE PAZ! 🌤️','CUIDAR DA SAÚDE É CUIDAR DE QUEM A GENTE AMA! 💙','MAIS UM DIA AO LADO DO CASAL MAIS FOFO DO MUNDO! 🌎','VOCÊS MERECEM TODO O CARINHO DO MUNDO! 🤗','UM CAFÉ, UM SORRISO E O CASAL MAIS QUERIDO! ☕','QUE BOM TER VOCÊS COM A GENTE! 🌻'];
 function escolherFrase(){let ultima=-1;try{const v=localStorage.getItem('agenda-ultima-frase');if(v!==null)ultima=Number(v)}catch(e){}let i=ultima<0?0:Math.floor(Math.random()*FRASES.length);if(FRASES.length>1&&i===ultima)i=(i+1)%FRASES.length;try{localStorage.setItem('agenda-ultima-frase',String(i))}catch(e){}return FRASES[i]}
 function quandoRel(d){const h=new Date();h.setHours(0,0,0,0);const x=new Date(d);x.setHours(0,0,0,0);const n=Math.round((x-h)/86400000);return n===0?'HOJE':n===1?'AMANHÃ':n>1?'DAQUI A '+n+' DIAS':''}
@@ -338,11 +356,36 @@ function setupFont(){document.documentElement.style.setProperty('--font-scale',s
 function setEasy(on){state.easy=on;document.body.classList.toggle('easy-mode',on);$('easy-toggle').textContent='MODO FÁCIL: '+(on?'ATIVO':'DESATIVADO');$('easy-toggle').setAttribute('aria-pressed',String(on))}
 function toAppointment(row){return {...row,when:new Date(row.data_hora)}}
 function sortItems(items){return items.sort((a,b)=>a.when-b.when)}
+const LISTA_ESPECIALIDADES=['CARDIOLOGISTA','CLÍNICO GERAL','DERMATOLOGISTA','DENTISTA','ENDOCRINOLOGISTA','GERIATRA','NEFROLOGISTA','NEUROLOGISTA','OFTALMOLOGISTA','ORTOPEDISTA','OTORRINO','UROLOGISTA','VASCULAR'];
+const LISTA_EXAMES=['EXAME DE SANGUE','HEMOGLOBINA GLICADA','GLICEMIA DE JEJUM','COLESTEROL E TRIGLICERÍDEOS','EXAME DE URINA','CREATININA (RINS)','PSA','ELETROCARDIOGRAMA','ECOCARDIOGRAMA','TESTE ERGOMÉTRICO','HOLTER','MAPA (PRESSÃO 24H)','ULTRASSOM','RAIO-X','TOMOGRAFIA','RESSONÂNCIA','DENSITOMETRIA ÓSSEA','FUNDO DE OLHO','ENDOSCOPIA','COLONOSCOPIA','DOPPLER'];
+const ehExame=c=>(c&&c.tipo)==='exame';
+const nomeTipo=c=>ehExame(c)?'EXAME':'CONSULTA';
+function textoJejum(c){
+ if(!ehExame(c)||!c.jejum_horas)return'';
+ const ini=new Date(c.when.getTime()-c.jejum_horas*3600000);
+ const dia=dateKey(ini)===dateKey(c.when)?'NO MESMO DIA':(quandoRel(ini)==='HOJE'?'HOJE':quandoRel(ini)==='AMANHÃ'?'AMANHÃ':'NA VÉSPERA');
+ return `⏳ JEJUM DE ${c.jejum_horas} HORAS: NÃO COMER DEPOIS DAS ${dateTime(ini)} (${dia}). ÁGUA PODE, SALVO ORIENTAÇÃO CONTRÁRIA.`;
+}
+function setTipoForm(tipo){
+ state.formTipo=tipo;const ex=tipo==='exame';
+ document.querySelectorAll('.tipo-escolha [data-tipo]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tipo===tipo)));
+ $('lbl-specialty').textContent=ex?'QUAL EXAME? *':'MÉDICO OU ESPECIALIDADE *';
+ $('specialty').placeholder=ex?'EX.: EXAME DE SANGUE':'EX.: CARDIOLOGISTA';
+ $('specialties').innerHTML=(ex?LISTA_EXAMES:LISTA_ESPECIALIDADES).map(x=>`<option value="${x}"></option>`).join('');
+ $('lbl-doctor').textContent=ex?'MÉDICO QUE PEDIU O EXAME':'NOME DO MÉDICO';
+ $('lbl-place').textContent=ex?'LABORATÓRIO / LOCAL':'LOCAL / ENDEREÇO';
+ $('place').placeholder=ex?'NOME DO LABORATÓRIO E ENDEREÇO':'NOME DA CLÍNICA E ENDEREÇO';
+ $('notes').placeholder=ex?'EX.: LEVAR PEDIDO MÉDICO, DOCUMENTO E CARTEIRINHA':'EX.: LEVAR EXAMES, DOCUMENTOS OU IR EM JEJUM';
+ $('campo-jejum').classList.toggle('hidden',!ex);
+ $('save-btn').textContent=ex?'SALVAR EXAME':'SALVAR CONSULTA';
+ const novo=!state.editing;$('form-title').textContent=(novo?(ex?'NOVO EXAME':'NOVA CONSULTA'):(ex?'EDITAR EXAME':'EDITAR CONSULTA'));
+}
 function filteredItems(){
  const now=new Date(),today=new Date();today.setHours(0,0,0,0);
  let a=state.items.slice();
  if(state.filter==='upcoming')a=a.filter(x=>x.when>=today&&x.status!=='cancelada');
  if(state.filter==='past')a=a.filter(x=>x.when<now||x.status==='realizada'||x.status==='cancelada').reverse();
+ if(state.filter==='exames')a=a.filter(x=>ehExame(x)&&x.when>=today&&x.status!=='cancelada');
  if(state.search){const q=state.search.toLowerCase();a=a.filter(x=>[x.especialidade,x.medico,x.local,x.observacoes].some(v=>(v||'').toLowerCase().includes(q)))}
  return a;
 }
@@ -357,19 +400,24 @@ function renderHome(){
  $('count-upcoming').textContent=upcoming.length;
  $('count-month').textContent=state.items.filter(x=>x.status!=='cancelada'&&x.when.getMonth()===now.getMonth()&&x.when.getFullYear()===now.getFullYear()).length;
  $('count-today').textContent=state.items.filter(x=>x.status==='agendada'&&dateKey(x.when)===dateKey(now)).length;
- if(!next){$('next-content').innerHTML='<p>NÃO HÁ CONSULTAS FUTURAS CADASTRADAS.</p>';$('listen-next').disabled=true}
- else{$('listen-next').disabled=false;$('next-content').innerHTML=`<div class="next-when"><div class="next-day"><strong>${pad(next.when.getDate())}</strong><span>${next.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div class="next-info"><span class="next-rel">${quandoRel(next.when)}</span><div class="next-weekday">${next.when.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()}, ${next.when.getDate()} DE ${next.when.toLocaleDateString('pt-BR',{month:'long'}).toUpperCase()}</div><div class="next-time">ÀS ${dateTime(next.when)}</div></div></div>${tempoProxima(next.when)}<p class="next-what">${escapeHtml(next.especialidade)}${next.medico?' — '+escapeHtml(next.medico):''}</p>${next.local?`<p>📍 ${escapeHtml(next.local)}</p>`:''}${next.observacoes?`<p class="next-obs">${escapeHtml(next.observacoes)}</p>`:''}`; $('listen-next').onclick=()=>say(`Sua próxima consulta é ${fmtDate(next.when)}, às ${dateTime(next.when)}, ${next.especialidade}${next.medico?', com '+next.medico:''}${next.local?', no endereço '+next.local:''}.`)}
+ $('next-titulo').textContent=next&&ehExame(next)?'PRÓXIMO COMPROMISSO: EXAME':'PRÓXIMO COMPROMISSO: CONSULTA';
+ if(!next){$('next-titulo').textContent='PRÓXIMO COMPROMISSO';$('next-content').innerHTML='<p>NÃO HÁ CONSULTAS NEM EXAMES FUTUROS CADASTRADOS.</p>';$('listen-next').disabled=true}
+ else{$('listen-next').disabled=false;$('next-content').innerHTML=`<div class="next-when"><div class="next-day"><strong>${pad(next.when.getDate())}</strong><span>${next.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div class="next-info"><span class="next-rel">${quandoRel(next.when)}</span><div class="next-weekday">${next.when.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()}, ${next.when.getDate()} DE ${next.when.toLocaleDateString('pt-BR',{month:'long'}).toUpperCase()}</div><div class="next-time">ÀS ${dateTime(next.when)}</div></div></div>${textoJejum(next)?`<div class="jejum">${textoJejum(next)}</div>`:''}${tempoProxima(next.when)}<p class="next-what">${ehExame(next)?'🧪 ':''}${escapeHtml(next.especialidade)}${next.medico?(ehExame(next)?' — PEDIDO POR ':' — ')+escapeHtml(next.medico):''}</p>${next.local?`<p>📍 ${escapeHtml(next.local)}</p>`:''}${next.observacoes?`<p class="next-obs">${escapeHtml(next.observacoes)}</p>`:''}`; $('listen-next').onclick=()=>say(`${ehExame(next)?'Seu próximo exame é':'Sua próxima consulta é'} ${fmtDate(next.when)}, às ${dateTime(next.when)}, ${next.especialidade}${next.medico&&!ehExame(next)?', com '+next.medico:''}${next.local?', no endereço '+next.local:''}. ${textoJejum(next).replace('⏳','')}`)}
  const alertItem=upcoming.find(x=>(x.when-now)/60000<=120);
- if(alertItem){$('alert-box').classList.remove('hidden');$('alert-box').textContent=`ATENÇÃO! VOCÊ TEM UMA CONSULTA ${alertItem.when.toDateString()===now.toDateString()?'HOJE':'EM BREVE'}, ÀS ${dateTime(alertItem.when)}: ${alertItem.especialidade}.`;$('alert-box').onclick=()=>say($('alert-box').textContent);const alertId=String(alertItem.id);if(state.soundEnabled&&!state.soundPlayed.has(alertId)){state.soundPlayed.add(alertId);playAlertSound()}}
+ if(alertItem){$('alert-box').classList.remove('hidden');$('alert-box').textContent=`ATENÇÃO! VOCÊ TEM ${ehExame(alertItem)?'UM EXAME':'UMA CONSULTA'} ${alertItem.when.toDateString()===now.toDateString()?'HOJE':'EM BREVE'}, ÀS ${dateTime(alertItem.when)}: ${alertItem.especialidade}.`;$('alert-box').onclick=()=>say($('alert-box').textContent);const alertId=String(alertItem.id);if(state.soundEnabled&&!state.soundPlayed.has(alertId)){state.soundPlayed.add(alertId);playAlertSound()}}
  else $('alert-box').classList.add('hidden');
+ // aviso de jejum: aparece a partir de 6 horas antes do jejum começar, até a hora do exame
+ const comJejum=upcoming.find(x=>ehExame(x)&&x.jejum_horas&&now>=new Date(x.when.getTime()-(x.jejum_horas+6)*3600000));
+ if(comJejum){$('jejum-box').textContent=`🧪 ${quandoRel(comJejum.when)||'EM BREVE'} TEM EXAME (${comJejum.especialidade}) ÀS ${dateTime(comJejum.when)}. `+textoJejum(comJejum).replace('⏳ ','');$('jejum-box').classList.remove('hidden')}
+ else $('jejum-box').classList.add('hidden');
 }
 function renderList(){
- const items=filteredItems();$('list-heading').textContent=state.filter==='past'?'HISTÓRICO':'MINHAS CONSULTAS';
+ const items=filteredItems();$('list-heading').textContent=state.filter==='past'?'HISTÓRICO':state.filter==='exames'?'MEUS EXAMES':'MINHAS CONSULTAS E EXAMES';
  document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===state.filter)));
- if(!items.length){$('appointment-list').innerHTML='<div class="empty">NENHUMA CONSULTA ENCONTRADA.</div>';return}
+ if(!items.length){$('appointment-list').innerHTML='<div class="empty">NADA ENCONTRADO.</div>';return}
  $('appointment-list').innerHTML=items.map(c=>{
  const status=c.status||'agendada';const label={agendada:'AGENDADA',realizada:'REALIZADA',cancelada:'CANCELADA'}[status]||status.toUpperCase();
- return `<article class="appointment"><div class="datebox"><strong>${pad(c.when.getDate())}</strong><span>${c.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div><div class="appointment-title">${escapeHtml(c.especialidade)}${c.medico?' — '+escapeHtml(c.medico):''}</div><div class="detail">${escapeHtml(fmtDate(c.when))} • ÀS ${dateTime(c.when)}</div>${c.local?`<div class="detail">LOCAL: ${escapeHtml(c.local)}</div>`:''}${c.telefone?`<div class="detail">TELEFONE: ${escapeHtml(c.telefone)}</div>`:''}${c.observacoes?`<div class="detail">OBSERVAÇÕES: ${escapeHtml(c.observacoes)}</div>`:''}${status==='agendada'?tempoLinha(c.when):''}<div class="tags"><span class="tag tag-${status}">${label}</span></div><div class="item-actions no-print"><button class="btn btn-small" data-edit="${escapeHtml(c.id)}">EDITAR</button><button class="btn btn-small btn-red" data-delete="${escapeHtml(c.id)}">EXCLUIR</button><button class="btn btn-small" data-speak="${escapeHtml(c.id)}">🔊 OUVIR</button></div></div></article>`
+ return `<article class="appointment${ehExame(c)?' exame':''}"><div class="datebox"><strong>${pad(c.when.getDate())}</strong><span>${c.when.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase()}</span></div><div><div class="appointment-title">${ehExame(c)?'🧪 ':''}${escapeHtml(c.especialidade)}${c.medico&&!ehExame(c)?' — '+escapeHtml(c.medico):''}</div><div class="detail">${escapeHtml(fmtDate(c.when))} • ÀS ${dateTime(c.when)}</div>${ehExame(c)&&c.medico?`<div class="detail">PEDIDO POR: ${escapeHtml(c.medico)}</div>`:''}${c.local?`<div class="detail">${ehExame(c)?'LABORATÓRIO':'LOCAL'}: ${escapeHtml(c.local)}</div>`:''}${status==='agendada'&&textoJejum(c)?`<div class="jejum">${textoJejum(c)}</div>`:''}${c.telefone?`<div class="detail">TELEFONE: ${escapeHtml(c.telefone)}</div>`:''}${c.observacoes?`<div class="detail">OBSERVAÇÕES: ${escapeHtml(c.observacoes)}</div>`:''}${status==='agendada'?tempoLinha(c.when):''}<div class="tags"><span class="tag tag-tipo-${ehExame(c)?'exame':'consulta'}">${ehExame(c)?'🧪 EXAME':'🩺 CONSULTA'}</span><span class="tag tag-${status}">${label}</span></div><div class="item-actions no-print"><button class="btn btn-small" data-edit="${escapeHtml(c.id)}">EDITAR</button><button class="btn btn-small btn-red" data-delete="${escapeHtml(c.id)}">EXCLUIR</button><button class="btn btn-small" data-speak="${escapeHtml(c.id)}">🔊 OUVIR</button></div></div></article>`
  }).join('');
 }
 function render(){renderHome();renderList();renderGlicose()}
@@ -513,32 +561,35 @@ async function load(){
  if(error){showError($('app-error'),'ERRO AO CARREGAR CONSULTAS: '+error.message);return}
  showError($('app-error'),'');state.items=sortItems((data||[]).map(toAppointment));render();carregarGlicose();
 }
-function openForm(item){
+function openForm(item,tipo){
  state.editing=item||null;showError($('form-error'),'');$('appointment-form').reset();
- $('form-title').textContent=item?'EDITAR CONSULTA':'NOVA CONSULTA';
+ setTipoForm(item?(item.tipo||'consulta'):(tipo||'consulta'));
  $('delete-from-form').classList.toggle('hidden',!item);
- if(item){$('date').value=dateKey(item.when);$('time').value=dateTime(item.when);$('specialty').value=item.especialidade||'';$('doctor').value=item.medico||'';$('place').value=item.local||'';$('phone').value=item.telefone||'';$('status').value=item.status||'agendada';$('notes').value=item.observacoes||''}
+ if(item){$('date').value=dateKey(item.when);$('time').value=dateTime(item.when);$('specialty').value=item.especialidade||'';$('doctor').value=item.medico||'';$('place').value=item.local||'';$('phone').value=item.telefone||'';$('status').value=item.status||'agendada';$('notes').value=item.observacoes||'';$('jejum').value=item.jejum_horas?String(item.jejum_horas):''}
  else{$('date').value=dateKey(new Date());$('time').value='09:00';$('status').value='agendada'}
  $('appointment-dialog').showModal();
 }
-function requestDelete(item){if(!item)return;state.deleting=item;$('confirm-text').textContent=`${item.especialidade} — ${fmtDate(item.when)} às ${dateTime(item.when)}?`;$('confirm-dialog').showModal()}
+function requestDelete(item){if(!item)return;state.deleting=item;$('confirm-text').textContent=`${nomeTipo(item)}: ${item.especialidade} — ${fmtDate(item.when)} às ${dateTime(item.when)}?`;$('confirm-dialog').showModal()}
 $('login-form').addEventListener('submit',async e=>{e.preventDefault();showError($('login-error'),'');const {error}=await sb.auth.signInWithPassword({email:nameToEmail($('login-name').value),password:$('login-password').value});if(error)showError($('login-error'),error.message.toLowerCase().includes('invalid login credentials')?'NOME OU SENHA INCORRETOS.':'NÃO FOI POSSÍVEL ENTRAR: '+error.message)});
 $('logout-btn').onclick=()=>sb.auth.signOut();
 sb.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>{const logged=!!session;$('login-screen').classList.toggle('hidden',logged);$('app').classList.toggle('hidden',!logged);if(logged){state.frase=null;load()}else state.items=[]},0)});
-$('new-btn').onclick=()=>openForm(null);
+$('new-btn').onclick=()=>openForm(null,'consulta');
+$('new-exame-btn').onclick=()=>openForm(null,'exame');
+document.querySelectorAll('.tipo-escolha [data-tipo]').forEach(b=>b.onclick=()=>setTipoForm(b.dataset.tipo));
 $('cancel-form').onclick=()=>$('appointment-dialog').close();
 $('appointment-form').addEventListener('submit',async e=>{
  e.preventDefault();const [y,m,d]=$('date').value.split('-').map(Number);const [hh,mm]=$('time').value.split(':').map(Number);const dt=new Date(y,m-1,d,hh,mm);
  if(Number.isNaN(dt.getTime())){showError($('form-error'),'INFORME UMA DATA E UM HORÁRIO VÁLIDOS.');return}
  const payload={data_hora:dt.toISOString(),especialidade:$('specialty').value.trim().toUpperCase(),medico:$('doctor').value.trim().toUpperCase()||null,local:$('place').value.trim().toUpperCase()||null,telefone:$('phone').value.trim()||null,status:$('status').value,observacoes:$('notes').value.trim().toUpperCase()||null};
+ const ex=state.formTipo==='exame';if(ex||(state.editing&&state.editing.tipo)){payload.tipo=ex?'exame':'consulta';payload.jejum_horas=ex&&$('jejum').value?Number($('jejum').value):null}
  $('save-btn').disabled=true;const result=state.editing?await sb.from('consultas').update(payload).eq('id',state.editing.id):await sb.from('consultas').insert(payload);$('save-btn').disabled=false;
- if(result.error){showError($('form-error'),'NÃO FOI POSSÍVEL SALVAR: '+result.error.message);return}
+ if(result.error){showError($('form-error'),/tipo|jejum_horas|schema cache/i.test(result.error.message)?'FALTA PREPARAR O BANCO PARA EXAMES: RODE O ARQUIVO exames.sql NO SUPABASE.':'NÃO FOI POSSÍVEL SALVAR: '+result.error.message);return}
  $('appointment-dialog').close();await load();
 });
 $('delete-from-form').onclick=()=>{const item=state.editing;$('appointment-dialog').close();requestDelete(item)};
 $('keep-btn').onclick=()=>$('confirm-dialog').close();
 $('confirm-delete').onclick=async()=>{if(!state.deleting)return;$('confirm-delete').disabled=true;const {error}=await sb.from('consultas').delete().eq('id',state.deleting.id);$('confirm-delete').disabled=false;if(error){alert('NÃO FOI POSSÍVEL EXCLUIR: '+error.message);return}state.deleting=null;$('confirm-dialog').close();await load()};
-$('appointment-list').addEventListener('click',e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]'),speak=e.target.closest('[data-speak]');if(edit)openForm(state.items.find(x=>String(x.id)===edit.dataset.edit));if(del)requestDelete(state.items.find(x=>String(x.id)===del.dataset.delete));if(speak){const c=state.items.find(x=>String(x.id)===speak.dataset.speak);if(c)say(`Consulta de ${c.especialidade}, ${fmtDate(c.when)}, às ${dateTime(c.when)}.${c.medico?', médico '+c.medico:''}${c.local?', local '+c.local:''}${c.observacoes?', observações: '+c.observacoes:''}`)}});
+$('appointment-list').addEventListener('click',e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]'),speak=e.target.closest('[data-speak]');if(edit)openForm(state.items.find(x=>String(x.id)===edit.dataset.edit));if(del)requestDelete(state.items.find(x=>String(x.id)===del.dataset.delete));if(speak){const c=state.items.find(x=>String(x.id)===speak.dataset.speak);if(c)say(`${ehExame(c)?'Exame':'Consulta'} de ${c.especialidade}, ${fmtDate(c.when)}, às ${dateTime(c.when)}.${c.medico?', médico '+c.medico:''}${c.local?', local '+c.local:''}${c.observacoes?', observações: '+c.observacoes:''}`)}});
 document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;renderList()});
 $('search').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderList()});
 $('show-upcoming').onclick=()=>{$('list-panel').scrollIntoView({behavior:'smooth'});state.filter='upcoming';renderList()};
